@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>محفظة الذهب</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold: #C9962A; --gold-light: #E8B84B; --gold-dim: #8a6510;
+    --bg: #0f0e0c; --bg2: #171510; --bg3: #1e1b14; --bg4: #252118;
+    --border: rgba(201,150,42,0.15); --border2: rgba(201,150,42,0.3);
+    --text: #f0e8d5; --text2: #a89870; --text3: #6b5e3e;
+    --green: #2ecc71; --red: #e74c3c; --r: 12px; --rs: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  .sidebar {
+    position: fixed; top: 0; right: 0; width: 220px; height: 100vh;
+    background: var(--bg2); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 100;
+  }
+  .logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 18px; }
+  .logo h1 { font-size: 17px; font-weight: 700; }
+  .logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--rs); cursor: pointer; font-size: 14px; color: var(--text2); border: 1px solid transparent; transition: all 0.2s; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(201,150,42,0.12); border-color: var(--border2); color: var(--gold-light); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3); }
+
+  .main { margin-right: 220px; min-height: 100vh; padding: 32px 36px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 24px; font-weight: 700; }
+  .page-sub { font-size: 13px; color: var(--text3); margin-top: 4px; }
+
+  /* PRICE WIDGET */
+  .price-widget {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 50px; padding: 8px 16px;
+  }
+  .price-widget label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .price-widget input {
+    background: transparent; border: none; outline: none;
+    font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--gold-light); width: 100px; text-align: center;
+  }
+  .price-widget input::-webkit-inner-spin-button { display: none; }
+  .price-widget span { font-size: 12px; color: var(--text3); }
+  .refresh-btn {
+    background: rgba(201,150,42,0.15); border: 1px solid var(--border2);
+    color: var(--gold-light); border-radius: 50px; padding: 4px 12px;
+    font-size: 12px; cursor: pointer; font-family: 'Tajawal', sans-serif;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(201,150,42,0.25); }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-left: 4px; animation: blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+  .metric-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; }
+  .metric-card.hl { border-color: var(--border2); background: rgba(201,150,42,0.06); }
+  .metric-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+  .metric-val { font-size: 22px; font-weight: 700; color: var(--gold-light); }
+  .metric-val.n { color: var(--text); font-size: 19px; }
+  .metric-chg { font-size: 12px; margin-top: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .card-hd { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+  .card-bd { padding: 20px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .fg { display: flex; flex-direction: column; gap: 6px; }
+  .fg.full { grid-column: 1/-1; }
+  .fg label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .fg input, .fg select, .fg textarea {
+    background: var(--bg4); border: 1px solid var(--border);
+    border-radius: var(--rs); padding: 10px 14px;
+    font-size: 14px; color: var(--text); font-family: 'Tajawal', sans-serif;
+    width: 100%; outline: none; transition: border-color 0.2s; -webkit-appearance: none;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--gold); }
+  .fg select option { background: var(--bg4); }
+  .fg textarea { height: 80px; resize: none; }
+  .btn-gold { background: var(--gold); color: #0f0e0c; border: none; border-radius: var(--rs); padding: 12px 28px; font-size: 14px; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer; transition: background 0.2s; width: 100%; }
+  .btn-gold:hover { background: var(--gold-light); }
+
+  .prev-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .prev-row:last-child { border-bottom: none; }
+  .prev-lbl { color: var(--text3); }
+  .prev-val { font-weight: 600; }
+  .prev-val.g { color: var(--gold-light); }
+
+  .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .hist-table th { padding: 10px 14px; text-align: right; font-size: 11px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; }
+  .hist-table td { padding: 12px 14px; border-bottom: 1px solid rgba(201,150,42,0.07); vertical-align: middle; }
+  .hist-table tr:hover td { background: rgba(201,150,42,0.03); }
+  .hist-table tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 4px; background: rgba(201,150,42,0.15); color: var(--gold-light); border: 1px solid rgba(201,150,42,0.25); }
+
+  .karat-row { margin-bottom: 18px; }
+  .karat-row-hd { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 13px; }
+  .karat-row-nm { font-weight: 600; }
+  .karat-row-info { color: var(--text3); }
+  .bar-track { height: 8px; background: var(--bg4); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--gold-dim), var(--gold-light)); transition: width 0.6s ease; }
+  .karat-stats { display: flex; gap: 16px; margin-top: 5px; font-size: 11px; color: var(--text3); flex-wrap: wrap; }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 50px; padding: 5px 14px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all 0.2s; }
+  .filter-btn.active, .filter-btn:hover { background: rgba(201,150,42,0.12); border-color: var(--border2); color: var(--gold-light); }
+
+  .rec-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(201,150,42,0.07); }
+  .rec-item:last-child { border-bottom: none; }
+  .rec-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(201,150,42,0.1); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .rec-info { flex: 1; min-width: 0; }
+  .rec-name { font-size: 14px; font-weight: 600; }
+  .rec-detail { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .rec-price { font-size: 14px; font-weight: 700; color: var(--gold-light); }
+  .rec-diff { font-size: 11px; margin-top: 2px; }
+
+  .empty-st { text-align: center; padding: 48px 20px; color: var(--text3); }
+  .empty-st .emo { font-size: 40px; margin-bottom: 12px; }
+  .empty-st p { font-size: 14px; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; }
+  .del-btn:hover { color: var(--red); background: rgba(231,76,60,0.1); }
+
+  .sum-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sum-table th { padding: 10px 14px; text-align: right; font-size: 11px; color: var(--text3); border-bottom: 1px solid var(--border); }
+  .sum-table td { padding: 13px 14px; border-bottom: 1px solid rgba(201,150,42,0.07); }
+  .sum-table tr:last-child td { border-bottom: none; }
+  .total-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: rgba(201,150,42,0.08); border-top: 1px solid var(--border2); font-size: 15px; font-weight: 700; }
+  .total-row span { color: var(--gold-light); }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .logo h1, .logo p, .nav-item span { display: none; }
+    .logo { padding: 16px 12px; }
+    .nav { padding: 10px 8px; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main { margin-right: 60px; padding: 20px 16px; }
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .metrics { grid-template-columns: 1fr; }
+    .main { padding: 14px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🪙</div>
+    <h1>محفظة الذهب</h1>
+    <p>Gold Portfolio</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">◈</span><span>لوحة التحكم</span></div>
+    <div class="nav-item" onclick="showPage('add')"><span class="nav-icon">＋</span><span>تسجيل شراء</span></div>
+    <div class="nav-item" onclick="showPage('history')"><span class="nav-icon">≡</span><span>سجل المشتريات</span></div>
+    <div class="nav-item" onclick="showPage('summary')"><span class="nav-icon">◎</span><span>ملخص العيارات</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="dot"></span>
+    <span id="sb-cd">مباشر</span>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">لوحة التحكم</div>
+        <div class="page-sub" id="db-upd">—</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="price-widget">
+          <label>سعر الجرام 24K</label>
+          <input type="number" id="price-input" min="1" step="0.01" value="605" onchange="onPriceChange()"/>
+          <span>ر.س</span>
+        </div>
+        <button class="refresh-btn" id="refresh-btn" onclick="autoFetchPrice()">↻ تحديث</button>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-lbl">إجمالي الوزن 24K</div><div class="metric-val n" id="db-wt">0.00</div><div class="metric-chg" style="color:var(--text3);">جرام</div></div>
+      <div class="metric-card"><div class="metric-lbl">عدد القطع</div><div class="metric-val n" id="db-cnt">0</div><div class="metric-chg" style="color:var(--text3);">قطعة</div></div>
+      <div class="metric-card hl"><div class="metric-lbl">القيمة الحالية</div><div class="metric-val" id="db-cv">0 ر.س</div></div>
+      <div class="metric-card"><div class="metric-lbl">الربح / الخسارة</div><div class="metric-val" id="db-prf">0 ر.س</div><div class="metric-chg" id="db-pct"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-hd">آخر المشتريات</div><div class="card-bd" id="db-rec"></div></div>
+      <div class="card"><div class="card-hd">توزيع العيارات</div><div class="card-bd" id="db-kd"></div></div>
+    </div>
+  </div>
+
+  <!-- ADD -->
+  <div class="page" id="page-add">
+    <div class="page-header">
+      <div><div class="page-title">تسجيل شراء جديد</div><div class="page-sub">أضف قطعة لمحفظتك</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-hd">بيانات الشراء</div>
+        <div class="card-bd">
+          <div class="form-grid">
+            <div class="fg full"><label>اسم القطعة</label><input type="text" id="f-name" placeholder="خاتم، أساور، سبيكة..."/></div>
+            <div class="fg"><label>الوزن (جرام)</label><input type="number" id="f-weight" placeholder="0.00" min="0" step="0.01"/></div>
+            <div class="fg"><label>العيار</label>
+              <select id="f-karat">
+                <option value="1">عيار 24 (99.9%)</option>
+                <option value="0.9167">عيار 22 (91.67%)</option>
+                <option value="0.875">عيار 21 (87.5%)</option>
+                <option value="0.75" selected>عيار 18 (75%)</option>
+                <option value="0.625">عيار 15 (62.5%)</option>
+                <option value="0.5833">عيار 14 (58.33%)</option>
+                <option value="0.417">عيار 10 (41.7%)</option>
+              </select>
+            </div>
+            <div class="fg"><label>تاريخ الشراء</label><input type="date" id="f-date"/></div>
+            <div class="fg"><label>سعر الشراء بالريال (اختياري)</label><input type="number" id="f-paid" placeholder="يُحسب تلقائياً بسعر اليوم"/></div>
+            <div class="fg full"><label>ملاحظات</label><textarea id="f-notes" placeholder="محل الشراء، مناسبة..."></textarea></div>
+            <div class="fg full"><button class="btn-gold" onclick="addPurchase()">تسجيل الشراء</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="card-hd">معاينة</div><div class="card-bd" id="prev-bd"><div class="empty-st"><div class="emo">✏️</div><p>أدخل البيانات لترى المعاينة</p></div></div></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="page-header">
+      <div><div class="page-title">سجل المشتريات</div><div class="page-sub" id="hist-cnt">—</div></div>
+    </div>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <table class="hist-table">
+          <thead><tr>
+            <th>التاريخ</th><th>القطعة</th><th>العيار</th>
+            <th>الوزن</th><th>24K</th><th>تكلفة الشراء</th>
+            <th>القيمة الآن</th><th>ربح/خسارة</th><th></th>
+          </tr></thead>
+          <tbody id="hist-body"></tbody>
+        </table>
+      </div>
+      <div class="total-row"><span>الإجمالي</span><span id="hist-tot">—</span></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="page" id="page-summary">
+    <div class="page-header">
+      <div><div class="page-title">ملخص العيارات</div><div class="page-sub">توزيع محفظتك</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-hd">توزيع الوزن</div><div class="card-bd" id="sum-bars"></div></div>
+      <div class="card"><div class="card-hd">جدول العيارات</div>
+        <div style="overflow-x:auto;">
+          <table class="sum-table">
+            <thead><tr><th>العيار</th><th>الوزن الفعلي</th><th>معادل 24K</th><th>القيمة</th><th>التكلفة</th></tr></thead>
+            <tbody id="sum-tbody"></tbody>
+          </table>
+          <div class="total-row"><span>المجموع</span><span id="sum-tot">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ─── STATE ──────────────────────────────────────────────────────
+  let goldPPG = parseFloat(localStorage.getItem('gold_ppg') || '605');
+  let purchases = JSON.parse(localStorage.getItem('gold_v3') || '[]');
+  let activeFilter = '';
+  let cdInterval;
+  let cdLeft = 300;
+
+  const KN = {"1":"24","0.9167":"22","0.875":"21","0.75":"18","0.625":"15","0.5833":"14","0.417":"10"};
+  const KL = v => "عيار " + (KN[v] || v);
+  const fmt = (n, d=0) => isNaN(n) ? '—' : n.toLocaleString('ar-SA',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const ppg = () => goldPPG;
+
+  function save() { localStorage.setItem('gold_v3', JSON.stringify(purchases)); }
+  function savePPG() { localStorage.setItem('gold_ppg', goldPPG.toString()); }
+
+  // ─── PRICE INPUT ─────────────────────────────────────────────────
+  document.getElementById('price-input').value = goldPPG;
+
+  function onPriceChange() {
+    const v = parseFloat(document.getElementById('price-input').value);
+    if (v > 0) { goldPPG = v; savePPG(); refreshAll(); }
+  }
+
+  // جلب سعر الذهب من أسرع مصدر يرد — 3 مصادر بالتوازي
+  async function autoFetchPrice() {
+    const btn = document.getElementById('refresh-btn');
+    if (btn) { btn.textContent = '⏳'; btn.classList.add('loading'); }
+
+    const SAR_RATE = 3.75; // ربط الريال بالدولار
+
+    // دالة مساعدة: تعيد سعر الجرام بالريال أو null
+    const trySource = async (fn) => { try { return await fn(); } catch(_){ return null; } };
+
+    // المصادر الثلاثة تعمل بالتوازي
+    const results = await Promise.allSettled([
+
+      // مصدر 1: metals.live — USD/oz مباشر
+      trySource(async () => {
+        const r = await fetch('https://api.metals.live/v1/spot/gold');
+        const d = await r.json();
+        const oz = d?.price;
+        if (oz > 2000 && oz < 6000) return parseFloat(((oz / 31.1035) * SAR_RATE).toFixed(2));
+        return null;
+      }),
+
+      // مصدر 2: gold-api.com — USD/oz
+      trySource(async () => {
+        const r = await fetch('https://api.gold-api.com/price/XAU');
+        const d = await r.json();
+        const oz = d?.price;
+        if (oz > 2000 && oz < 6000) return parseFloat(((oz / 31.1035) * SAR_RATE).toFixed(2));
+        return null;
+      }),
+
+      // مصدر 3: open.er-api.com — XAU/SAR مباشر
+      trySource(async () => {
+        const r = await fetch('https://open.er-api.com/v6/latest/XAU');
+        const d = await r.json();
+        const sarPerOz = d?.rates?.SAR;
+        if (sarPerOz > 5000 && sarPerOz < 25000) return parseFloat((sarPerOz / 31.1035).toFixed(2));
+        return null;
+      }),
+    ]);
+
+    // أخذ أول نتيجة صحيحة
+    let fetched = false;
+    for (const r of results) {
+      const val = r.status === 'fulfilled' ? r.value : null;
+      if (val && val > 400 && val < 2000) {
+        goldPPG = val;
+        fetched = true;
+        break;
+      }
+    }
+
+    // حفظ وتحديث الواجهة
+    document.getElementById('price-input').value = goldPPG;
+    savePPG();
+    refreshAll();
+
+    const now = new Date();
+    const sb = document.getElementById('sb-cd');
+    if (sb) sb.textContent = 'تحديث ' + now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+
+    if (btn) {
+      btn.textContent = fetched ? '✓' : '↻';
+      setTimeout(() => { btn.textContent = '↻'; btn.classList.remove('loading'); }, 1500);
+    }
+    startCountdown();
+  }
+
+  function startCountdown() {
+    clearInterval(cdInterval);
+    cdLeft = 60; // كل 60 ثانية
+    cdInterval = setInterval(() => {
+      cdLeft--;
+      const sb = document.getElementById('sb-cd');
+      if (cdLeft <= 0) {
+        if (sb) sb.textContent = 'جاري التحديث...';
+        autoFetchPrice();
+        return;
+      }
+      if (sb) sb.textContent = 'تحديث خلال ' + cdLeft + 'ث';
+    }, 1000);
+  }
+
+  // ─── NAVIGATION ──────────────────────────────────────────────────
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+id).classList.add('active');
+    const idx=['dashboard','add','history','summary'].indexOf(id);
+    document.querySelectorAll('.nav-item')[idx].classList.add('active');
+    refreshAll();
+  }
+
+  function refreshAll() {
+    renderDashboard();
+    if(document.getElementById('page-history').classList.contains('active')) renderHistory();
+    if(document.getElementById('page-summary').classList.contains('active')) renderSummary();
+    updatePreview();
+  }
+
+  // ─── FORM ─────────────────────────────────────────────────────────
+  ['f-weight','f-karat','f-paid'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.addEventListener('input',updatePreview);
+    el.addEventListener('change',updatePreview);
+  });
+
+  function updatePreview() {
+    const wt=parseFloat(document.getElementById('f-weight').value);
+    const kt=document.getElementById('f-karat').value;
+    const paidRaw=document.getElementById('f-paid').value;
+    const box=document.getElementById('prev-bd');
+    if(!wt||wt<=0){box.innerHTML='<div class="empty-st"><div class="emo">✏️</div><p>أدخل البيانات لترى المعاينة</p></div>';return;}
+    const pur=parseFloat(kt);
+    const w24=wt*pur;
+    const cur=w24*ppg();
+    const paid=paidRaw?parseFloat(paidRaw):cur;
+    const diff=cur-paid;
+    box.innerHTML=`
+      <div class="prev-row"><span class="prev-lbl">العيار</span><span class="prev-val"><span class="badge">${KL(kt)}</span></span></div>
+      <div class="prev-row"><span class="prev-lbl">الوزن الفعلي</span><span class="prev-val">${wt.toFixed(2)} جرام</span></div>
+      <div class="prev-row"><span class="prev-lbl">معادل عيار 24</span><span class="prev-val">${w24.toFixed(2)} جرام</span></div>
+      <div class="prev-row"><span class="prev-lbl">سعر الشراء</span><span class="prev-val">${fmt(paid,2)} ر.س</span></div>
+      <div class="prev-row"><span class="prev-lbl">القيمة الحالية</span><span class="prev-val g">${fmt(cur,2)} ر.س</span></div>
+      <div class="prev-row"><span class="prev-lbl">الربح / الخسارة</span><span class="prev-val" style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff>=0?'+':''}${fmt(diff,2)} ر.س</span></div>`;
+  }
+
+  function addPurchase() {
+    const name=document.getElementById('f-name').value.trim()||'ذهب';
+    const wt=parseFloat(document.getElementById('f-weight').value);
+    const kt=document.getElementById('f-karat').value;
+    const date=document.getElementById('f-date').value||new Date().toISOString().split('T')[0];
+    const paidRaw=document.getElementById('f-paid').value;
+    const notes=document.getElementById('f-notes').value.trim();
+    if(!wt||wt<=0){const el=document.getElementById('f-weight');el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1200);return;}
+    const pur=parseFloat(kt);
+    const w24=wt*pur;
+    const paid=paidRaw?parseFloat(paidRaw):parseFloat((w24*ppg()).toFixed(2));
+    purchases.unshift({id:Date.now(),name,weight:wt,karat:kt,weight24:w24,paid,date,notes});
+    save();
+    ['f-name','f-weight','f-paid','f-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('prev-bd').innerHTML='<div class="empty-st"><div class="emo">✅</div><p>تم تسجيل الشراء!</p></div>';
+    setTimeout(()=>showPage('dashboard'),800);
+  }
+
+  // ─── DASHBOARD ───────────────────────────────────────────────────
+  function renderDashboard() {
+    const p=ppg();
+    let tw=0,tc=0;
+    purchases.forEach(x=>{tw+=x.weight24;tc+=x.paid;});
+    const cv=tw*p, pr=cv-tc, pct=tc>0?pr/tc*100:0;
+    document.getElementById('db-wt').textContent=tw.toFixed(2);
+    document.getElementById('db-cnt').textContent=purchases.length;
+    document.getElementById('db-cv').textContent=fmt(cv,0)+' ر.س';
+    const pe=document.getElementById('db-prf');
+    pe.textContent=(pr>=0?'+':'')+fmt(pr,0)+' ر.س';
+    pe.style.color=pr>=0?'var(--green)':'var(--red)';
+    const pce=document.getElementById('db-pct');
+    pce.textContent=(pct>=0?'▲ ':'▼ ')+Math.abs(pct).toFixed(1)+'%';
+    pce.className='metric-chg '+(pct>=0?'up':'dn');
+    const now=new Date();
+    document.getElementById('db-upd').textContent='آخر تحديث: '+now.toLocaleTimeString('ar-SA');
+
+    const icons=['💍','📿','🏅','🔶','⭐','🌟'];
+    const re=document.getElementById('db-rec');
+    if(!purchases.length){re.innerHTML='<div class="empty-st"><div class="emo">📭</div><p>لا يوجد مشتريات بعد</p></div>';}
+    else{re.innerHTML=purchases.slice(0,5).map((x,i)=>{const c=x.weight24*p,d=c-x.paid;return`<div class="rec-item"><div class="rec-icon">${icons[i%icons.length]}</div><div class="rec-info"><div class="rec-name">${x.name} <span class="badge">${KL(x.karat)}</span></div><div class="rec-detail">${x.date} · ${x.weight.toFixed(2)} جرام</div></div><div style="text-align:left;"><div class="rec-price">${fmt(c,0)} ر.س</div><div class="rec-diff" style="color:${d>=0?'var(--green)':'var(--red)'};">${d>=0?'+':''}${fmt(d,0)}</div></div></div>`;}).join('');}
+
+    const byK={};let tW=0;
+    purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]=0;byK[x.karat]+=x.weight24;tW+=x.weight24;});
+    const ke=document.getElementById('db-kd');
+    const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
+    if(!ks.length){ke.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>لا توجد بيانات</p></div>';}
+    else{ke.innerHTML=ks.map(k=>{const pct2=tW>0?byK[k]/tW*100:0;return`<div class="karat-row"><div class="karat-row-hd"><span class="karat-row-nm">${KL(k)}</span><span class="karat-row-info">${byK[k].toFixed(2)} جرام · ${pct2.toFixed(0)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct2.toFixed(1)}%"></div></div></div>`;}).join('');}
+  }
+
+  // ─── HISTORY ─────────────────────────────────────────────────────
+  function renderHistory() {
+    const fbar=document.getElementById('filter-bar');
+    const karats=[...new Set(purchases.map(p=>p.karat))].sort((a,b)=>parseFloat(b)-parseFloat(a));
+    fbar.innerHTML=`<button class="filter-btn ${activeFilter===''?'active':''}" onclick="setFilter('')">الكل (${purchases.length})</button>`+karats.map(k=>`<button class="filter-btn ${activeFilter===k?'active':''}" onclick="setFilter('${k}')">${KL(k)} (${purchases.filter(p=>p.karat===k).length})</button>`).join('');
+    const list=activeFilter?purchases.filter(p=>p.karat===activeFilter):purchases;
+    document.getElementById('hist-cnt').textContent=list.length+' سجل';
+    const p=ppg();let tc=0;
+    const tb=document.getElementById('hist-body');
+    if(!list.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3);">لا توجد مشتريات</td></tr>';document.getElementById('hist-tot').textContent='—';return;}
+    tb.innerHTML=list.map(x=>{const c=x.weight24*p;tc+=c;const d=c-x.paid;return`<tr><td style="color:var(--text3);white-space:nowrap;">${x.date}</td><td><strong>${x.name}</strong>${x.notes?`<br><small style="color:var(--text3);">${x.notes}</small>`:''}</td><td><span class="badge">${KL(x.karat)}</span></td><td>${x.weight.toFixed(2)} جرام</td><td style="color:var(--text2);">${x.weight24.toFixed(2)}</td><td>${fmt(x.paid,0)} ر.س</td><td style="color:var(--gold-light);font-weight:600;">${fmt(c,0)} ر.س</td><td style="color:${d>=0?'var(--green)':'var(--red)'};font-weight:600;">${d>=0?'+':''}${fmt(d,0)}</td><td><button class="del-btn" onclick="del(${x.id})">✕</button></td></tr>`;}).join('');
+    document.getElementById('hist-tot').textContent=fmt(tc,0)+' ر.س';
+  }
+
+  function setFilter(k){activeFilter=k;renderHistory();}
+  function del(id){if(!confirm('حذف هذا السجل؟'))return;purchases=purchases.filter(p=>p.id!==id);save();renderHistory();renderDashboard();}
+
+  // ─── SUMMARY ─────────────────────────────────────────────────────
+  function renderSummary() {
+    const p=ppg();
+    const byK={};let tW=0,tV=0,tC=0;
+    purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]={wt:0,w24:0,paid:0};byK[x.karat].wt+=x.weight;byK[x.karat].w24+=x.weight24;byK[x.karat].paid+=x.paid;tW+=x.weight24;tC+=x.paid;});
+    tV=tW*p;
+    const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
+    const be=document.getElementById('sum-bars'),te=document.getElementById('sum-tbody');
+    if(!ks.length){be.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>لا توجد بيانات</p></div>';te.innerHTML='<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text3);">لا توجد بيانات</td></tr>';document.getElementById('sum-tot').textContent='—';return;}
+    be.innerHTML=ks.map(k=>{const d=byK[k],pct=tW>0?d.w24/tW*100:0,val=d.w24*p;return`<div class="karat-row"><div class="karat-row-hd"><span class="karat-row-nm">${KL(k)}</span><span class="karat-row-info">${pct.toFixed(1)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="karat-stats"><span>الوزن: ${d.wt.toFixed(2)} جرام</span><span>24K: ${d.w24.toFixed(2)} جرام</span><span style="color:var(--gold-light);">القيمة: ${fmt(val,0)} ر.س</span></div></div>`;}).join('');
+    te.innerHTML=ks.map(k=>{const d=byK[k],val=d.w24*p;return`<tr><td><span class="badge">${KL(k)}</span></td><td>${d.wt.toFixed(2)} جرام</td><td>${d.w24.toFixed(2)} جرام</td><td style="color:var(--gold-light);font-weight:600;">${fmt(val,0)} ر.س</td><td style="color:var(--text3);">${fmt(d.paid,0)} ر.س</td></tr>`;}).join('');
+    document.getElementById('sum-tot').textContent=fmt(tV,0)+' ر.س';
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────────
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  renderDashboard();
+  autoFetchPrice();
+</script>
+</body>
+</html>
