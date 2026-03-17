@@ -3,523 +3,468 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>محفظة الذهب</title>
+<title>محفظة الذهب | Gold Portfolio</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --gold: #C9962A; --gold-light: #E8B84B; --gold-dim: #8a6510;
-    --bg: #0f0e0c; --bg2: #171510; --bg3: #1e1b14; --bg4: #252118;
-    --border: rgba(201,150,42,0.15); --border2: rgba(201,150,42,0.3);
-    --text: #f0e8d5; --text2: #a89870; --text3: #6b5e3e;
-    --green: #2ecc71; --red: #e74c3c; --r: 12px; --rs: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-  .sidebar {
-    position: fixed; top: 0; right: 0; width: 220px; height: 100vh;
-    background: var(--bg2); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; z-index: 100;
-  }
-  .logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
-  .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 18px; }
-  .logo h1 { font-size: 17px; font-weight: 700; }
-  .logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--rs); cursor: pointer; font-size: 14px; color: var(--text2); border: 1px solid transparent; transition: all 0.2s; }
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active { background: rgba(201,150,42,0.12); border-color: var(--border2); color: var(--gold-light); }
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3); }
-
-  .main { margin-right: 220px; min-height: 100vh; padding: 32px 36px; }
-  .page { display: none; }
-  .page.active { display: block; }
-
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-  .page-title { font-size: 24px; font-weight: 700; }
-  .page-sub { font-size: 13px; color: var(--text3); margin-top: 4px; }
-
-  /* PRICE WIDGET */
-  .price-widget {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 50px; padding: 8px 16px;
-  }
-  .price-widget label { font-size: 12px; color: var(--text3); white-space: nowrap; }
-  .price-widget input {
-    background: transparent; border: none; outline: none;
-    font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
-    color: var(--gold-light); width: 100px; text-align: center;
-  }
-  .price-widget input::-webkit-inner-spin-button { display: none; }
-  .price-widget span { font-size: 12px; color: var(--text3); }
-  .refresh-btn {
-    background: rgba(201,150,42,0.15); border: 1px solid var(--border2);
-    color: var(--gold-light); border-radius: 50px; padding: 4px 12px;
-    font-size: 12px; cursor: pointer; font-family: 'Tajawal', sans-serif;
-    white-space: nowrap; transition: all 0.2s;
-  }
-  .refresh-btn:hover { background: rgba(201,150,42,0.25); }
-  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
-
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-left: 4px; animation: blink 1.4s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-
-  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
-  .metric-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; }
-  .metric-card.hl { border-color: var(--border2); background: rgba(201,150,42,0.06); }
-  .metric-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
-  .metric-val { font-size: 22px; font-weight: 700; color: var(--gold-light); }
-  .metric-val.n { color: var(--text); font-size: 19px; }
-  .metric-chg { font-size: 12px; margin-top: 4px; }
-
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-  .card-hd { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
-  .card-bd { padding: 20px; }
-
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .fg { display: flex; flex-direction: column; gap: 6px; }
-  .fg.full { grid-column: 1/-1; }
-  .fg label { font-size: 12px; color: var(--text2); font-weight: 500; }
-  .fg input, .fg select, .fg textarea {
-    background: var(--bg4); border: 1px solid var(--border);
-    border-radius: var(--rs); padding: 10px 14px;
-    font-size: 14px; color: var(--text); font-family: 'Tajawal', sans-serif;
-    width: 100%; outline: none; transition: border-color 0.2s; -webkit-appearance: none;
-  }
-  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--gold); }
-  .fg select option { background: var(--bg4); }
-  .fg textarea { height: 80px; resize: none; }
-  .btn-gold { background: var(--gold); color: #0f0e0c; border: none; border-radius: var(--rs); padding: 12px 28px; font-size: 14px; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer; transition: background 0.2s; width: 100%; }
-  .btn-gold:hover { background: var(--gold-light); }
-
-  .prev-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .prev-row:last-child { border-bottom: none; }
-  .prev-lbl { color: var(--text3); }
-  .prev-val { font-weight: 600; }
-  .prev-val.g { color: var(--gold-light); }
-
-  .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .hist-table th { padding: 10px 14px; text-align: right; font-size: 11px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; }
-  .hist-table td { padding: 12px 14px; border-bottom: 1px solid rgba(201,150,42,0.07); vertical-align: middle; }
-  .hist-table tr:hover td { background: rgba(201,150,42,0.03); }
-  .hist-table tr:last-child td { border-bottom: none; }
-
-  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 4px; background: rgba(201,150,42,0.15); color: var(--gold-light); border: 1px solid rgba(201,150,42,0.25); }
-
-  .karat-row { margin-bottom: 18px; }
-  .karat-row-hd { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 13px; }
-  .karat-row-nm { font-weight: 600; }
-  .karat-row-info { color: var(--text3); }
-  .bar-track { height: 8px; background: var(--bg4); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--gold-dim), var(--gold-light)); transition: width 0.6s ease; }
-  .karat-stats { display: flex; gap: 16px; margin-top: 5px; font-size: 11px; color: var(--text3); flex-wrap: wrap; }
-
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 50px; padding: 5px 14px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all 0.2s; }
-  .filter-btn.active, .filter-btn:hover { background: rgba(201,150,42,0.12); border-color: var(--border2); color: var(--gold-light); }
-
-  .rec-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(201,150,42,0.07); }
-  .rec-item:last-child { border-bottom: none; }
-  .rec-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(201,150,42,0.1); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .rec-info { flex: 1; min-width: 0; }
-  .rec-name { font-size: 14px; font-weight: 600; }
-  .rec-detail { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .rec-price { font-size: 14px; font-weight: 700; color: var(--gold-light); }
-  .rec-diff { font-size: 11px; margin-top: 2px; }
-
-  .empty-st { text-align: center; padding: 48px 20px; color: var(--text3); }
-  .empty-st .emo { font-size: 40px; margin-bottom: 12px; }
-  .empty-st p { font-size: 14px; }
-  .del-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; }
-  .del-btn:hover { color: var(--red); background: rgba(231,76,60,0.1); }
-
-  .sum-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .sum-table th { padding: 10px 14px; text-align: right; font-size: 11px; color: var(--text3); border-bottom: 1px solid var(--border); }
-  .sum-table td { padding: 13px 14px; border-bottom: 1px solid rgba(201,150,42,0.07); }
-  .sum-table tr:last-child td { border-bottom: none; }
-  .total-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: rgba(201,150,42,0.08); border-top: 1px solid var(--border2); font-size: 15px; font-weight: 700; }
-  .total-row span { color: var(--gold-light); }
-
-  @media (max-width: 900px) {
-    .sidebar { width: 60px; }
-    .logo h1, .logo p, .nav-item span { display: none; }
-    .logo { padding: 16px 12px; }
-    .nav { padding: 10px 8px; }
-    .nav-item { justify-content: center; padding: 10px; }
-    .main { margin-right: 60px; padding: 20px 16px; }
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .grid2 { grid-template-columns: 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 500px) {
-    .metrics { grid-template-columns: 1fr; }
-    .main { padding: 14px 12px; }
-  }
+  :root{--gold:#C9962A;--gold-light:#E8B84B;--gold-dim:#8a6510;--bg:#0f0e0c;--bg2:#171510;--bg3:#1e1b14;--bg4:#252118;--border:rgba(201,150,42,0.15);--border2:rgba(201,150,42,0.3);--text:#f0e8d5;--text2:#a89870;--text3:#6b5e3e;--green:#2ecc71;--red:#e74c3c;--r:12px;--rs:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  #login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;}
+  .login-box{width:320px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:36px 28px;text-align:center;}
+  .login-icon{font-size:40px;margin-bottom:14px;}
+  .login-box h2{font-size:20px;font-weight:700;margin-bottom:5px;}
+  .login-box p{font-size:12px;color:var(--text3);margin-bottom:20px;}
+  .lang-row{display:flex;gap:8px;justify-content:center;margin-bottom:18px;}
+  .lb{background:var(--bg4);border:1px solid var(--border);border-radius:50px;padding:4px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Tajawal',sans-serif;transition:all .2s;}
+  .lb.active{background:rgba(201,150,42,.15);border-color:var(--border2);color:var(--gold-light);}
+  .pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:20px;}
+  .pd{width:13px;height:13px;border-radius:50%;background:var(--bg4);border:1.5px solid var(--border2);transition:background .2s;}
+  .pd.filled{background:var(--gold);}
+  .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+  .pb{height:50px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg4);color:var(--text);font-size:19px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all .15s;}
+  .pb:hover{background:var(--bg3);border-color:var(--border2);}
+  .pb:active{transform:scale(.93);}
+  .pb.del{font-size:15px;color:var(--text3);}
+  .lerr{font-size:12px;color:var(--red);min-height:16px;margin-bottom:4px;}
+  .lnote{font-size:11px;color:var(--text3);margin-top:6px;}
+  #app{display:none;}
+  .sidebar{position:fixed;top:0;right:0;width:215px;height:100vh;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+  .logo{padding:22px 20px 16px;border-bottom:1px solid var(--border);}
+  .logo-icon{width:34px;height:34px;border-radius:10px;background:var(--gold);display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:17px;}
+  .logo h1{font-size:15px;font-weight:700;}
+  .logo p{font-size:10px;color:var(--text3);margin-top:2px;}
+  .nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px;}
+  .ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);cursor:pointer;font-size:13px;color:var(--text2);border:1px solid transparent;transition:all .2s;}
+  .ni:hover{background:var(--bg3);color:var(--text);}
+  .ni.active{background:rgba(201,150,42,.12);border-color:var(--border2);color:var(--gold-light);}
+  .ni-icon{font-size:15px;width:20px;text-align:center;}
+  .sfooter{padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
+  .sb-acts{display:flex;gap:5px;margin-top:7px;}
+  .sbb{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Tajawal',sans-serif;text-align:center;transition:all .2s;}
+  .sbb:hover{border-color:var(--border2);color:var(--text2);}
+  .main{margin-right:215px;min-height:100vh;padding:26px 30px;}
+  .page{display:none;}.page.active{display:block;}
+  .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+  .pt{font-size:21px;font-weight:700;}
+  .ps{font-size:12px;color:var(--text3);margin-top:3px;}
+  .pw{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:50px;padding:7px 14px;}
+  .pw label{font-size:11px;color:var(--text3);white-space:nowrap;}
+  .pw input{background:transparent;border:none;outline:none;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;color:var(--gold-light);width:88px;text-align:center;}
+  .pw input::-webkit-inner-spin-button{display:none;}
+  .pw span{font-size:11px;color:var(--text3);}
+  .rbtn{background:rgba(201,150,42,.15);border:1px solid var(--border2);color:var(--gold-light);border-radius:50px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:'Tajawal',sans-serif;white-space:nowrap;transition:all .2s;}
+  .rbtn:hover{background:rgba(201,150,42,.25);}
+  .rbtn.loading{opacity:.6;pointer-events:none;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-left:4px;animation:blink 1.4s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  .mets{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .mc{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px;}
+  .mc.hl{border-color:var(--border2);background:rgba(201,150,42,.06);}
+  .ml{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .mv{font-size:20px;font-weight:700;color:var(--gold-light);}
+  .mv.n{color:var(--text);font-size:17px;}
+  .mch{font-size:11px;margin-top:3px;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+  .chd{padding:13px 17px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;}
+  .cbd{padding:17px;}
+  .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .fg{display:flex;flex-direction:column;gap:5px;}
+  .fg.full{grid-column:1/-1;}
+  .fg label{font-size:11px;color:var(--text2);font-weight:500;}
+  .fg input,.fg select,.fg textarea{background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;font-size:13px;color:var(--text);font-family:'Tajawal',sans-serif;width:100%;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);}
+  .fg select option{background:var(--bg4);}
+  .fg textarea{height:68px;resize:none;}
+  .bgold{background:var(--gold);color:#0f0e0c;border:none;border-radius:var(--rs);padding:11px 22px;font-size:13px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:background .2s;width:100%;}
+  .bgold:hover{background:var(--gold-light);}
+  .pr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .pr:last-child{border-bottom:none;}
+  .prl{color:var(--text3);}
+  .prv{font-weight:600;}
+  .prv.g{color:var(--gold-light);}
+  .ht{width:100%;border-collapse:collapse;font-size:12px;}
+  .ht th{padding:8px 11px;text-align:right;font-size:10px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;}
+  .ht td{padding:10px 11px;border-bottom:1px solid rgba(201,150,42,.07);vertical-align:middle;}
+  .ht tr:hover td{background:rgba(201,150,42,.03);}
+  .ht tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(201,150,42,.15);color:var(--gold-light);border:1px solid rgba(201,150,42,.25);}
+  .kr{margin-bottom:15px;}
+  .krhd{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;}
+  .krnm{font-weight:600;}
+  .krinfo{color:var(--text3);}
+  .btr{height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+  .bfill{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--gold-dim),var(--gold-light));transition:width .6s ease;}
+  .kstats{display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--text3);flex-wrap:wrap;}
+  .fbar{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;}
+  .fbtn{background:var(--bg3);border:1px solid var(--border);border-radius:50px;padding:4px 12px;font-size:11px;color:var(--text2);cursor:pointer;font-family:'Tajawal',sans-serif;transition:all .2s;}
+  .fbtn.active,.fbtn:hover{background:rgba(201,150,42,.12);border-color:var(--border2);color:var(--gold-light);}
+  .ri{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid rgba(201,150,42,.07);}
+  .ri:last-child{border-bottom:none;}
+  .ric{width:35px;height:35px;border-radius:9px;background:rgba(201,150,42,.1);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .rinf{flex:1;min-width:0;}
+  .rnm{font-size:13px;font-weight:600;}
+  .rdt{font-size:11px;color:var(--text3);margin-top:1px;}
+  .rpr{font-size:13px;font-weight:700;color:var(--gold-light);}
+  .rdf{font-size:10px;margin-top:1px;}
+  .empty-st{text-align:center;padding:36px 20px;color:var(--text3);}
+  .empty-st .emo{font-size:34px;margin-bottom:10px;}
+  .empty-st p{font-size:13px;}
+  .dbtn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:3px 5px;border-radius:4px;transition:all .15s;}
+  .dbtn:hover{color:var(--red);background:rgba(231,76,60,.1);}
+  .st{width:100%;border-collapse:collapse;font-size:12px;}
+  .st th{padding:8px 11px;text-align:right;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);}
+  .st td{padding:10px 11px;border-bottom:1px solid rgba(201,150,42,.07);}
+  .st tr:last-child td{border-bottom:none;}
+  .trow{display:flex;justify-content:space-between;align-items:center;padding:12px 17px;background:rgba(201,150,42,.08);border-top:1px solid var(--border2);font-size:14px;font-weight:700;}
+  .trow span{color:var(--gold-light);}
+  @media(max-width:900px){.sidebar{width:54px;}.logo h1,.logo p,.ni span,.sbb span{display:none;}.logo{padding:13px 10px;}.nav{padding:8px 6px;}.ni{justify-content:center;padding:9px;}.main{margin-right:54px;padding:16px 12px;}.mets{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}.fg2{grid-template-columns:1fr;}}
+  @media(max-width:500px){.mets{grid-template-columns:1fr;}.main{padding:11px 9px;}}
 </style>
 </head>
 <body>
 
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🪙</div>
+    <h2 id="l-title">محفظة الذهب</h2>
+    <p id="l-sub">أدخل رمز PIN للدخول</p>
+    <div class="lang-row">
+      <button class="lb active" id="l-ar" onclick="setLang('ar')">العربية</button>
+      <button class="lb" id="l-en" onclick="setLang('en')">English</button>
+    </div>
+    <div class="pin-dots">
+      <div class="pd" id="d0"></div><div class="pd" id="d1"></div>
+      <div class="pd" id="d2"></div><div class="pd" id="d3"></div>
+    </div>
+    <div class="lerr" id="lerr"></div>
+    <div class="pin-pad">
+      <button class="pb" onclick="pp('1')">1</button><button class="pb" onclick="pp('2')">2</button><button class="pb" onclick="pp('3')">3</button>
+      <button class="pb" onclick="pp('4')">4</button><button class="pb" onclick="pp('5')">5</button><button class="pb" onclick="pp('6')">6</button>
+      <button class="pb" onclick="pp('7')">7</button><button class="pb" onclick="pp('8')">8</button><button class="pb" onclick="pp('9')">9</button>
+      <button class="pb" onclick="pp('0')" style="grid-column:2">0</button>
+      <button class="pb del" onclick="pd()">⌫</button>
+    </div>
+    <div class="lnote" id="lnote"></div>
+  </div>
+</div>
+
+<div id="app">
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">🪙</div>
-    <h1>محفظة الذهب</h1>
+    <h1 id="s-title">محفظة الذهب</h1>
     <p>Gold Portfolio</p>
   </div>
   <nav class="nav">
-    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">◈</span><span>لوحة التحكم</span></div>
-    <div class="nav-item" onclick="showPage('add')"><span class="nav-icon">＋</span><span>تسجيل شراء</span></div>
-    <div class="nav-item" onclick="showPage('history')"><span class="nav-icon">≡</span><span>سجل المشتريات</span></div>
-    <div class="nav-item" onclick="showPage('summary')"><span class="nav-icon">◎</span><span>ملخص العيارات</span></div>
+    <div class="ni active" onclick="showPage('dashboard')"><span class="ni-icon">◈</span><span data-i="nav_dash">لوحة التحكم</span></div>
+    <div class="ni" onclick="showPage('add')"><span class="ni-icon">＋</span><span data-i="nav_add">تسجيل شراء</span></div>
+    <div class="ni" onclick="showPage('history')"><span class="ni-icon">≡</span><span data-i="nav_hist">سجل المشتريات</span></div>
+    <div class="ni" onclick="showPage('summary')"><span class="ni-icon">◎</span><span data-i="nav_sum">ملخص العيارات</span></div>
   </nav>
-  <div class="sidebar-footer">
-    <span class="dot"></span>
-    <span id="sb-cd">مباشر</span>
+  <div class="sfooter">
+    <span class="dot"></span><span id="sb-cd">مباشر</span>
+    <div class="sb-acts">
+      <button class="sbb active" id="sb-ar" onclick="setLang('ar')">ع</button>
+      <button class="sbb" id="sb-en" onclick="setLang('en')">EN</button>
+      <button class="sbb" onclick="lockApp()">🔒</button>
+    </div>
   </div>
 </aside>
 
 <main class="main">
 
-  <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
-    <div class="page-header">
-      <div>
-        <div class="page-title">لوحة التحكم</div>
-        <div class="page-sub" id="db-upd">—</div>
-      </div>
+    <div class="ph">
+      <div><div class="pt" data-i="nav_dash">لوحة التحكم</div><div class="ps" id="db-upd">—</div></div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <div class="price-widget">
-          <label>سعر الجرام 24K</label>
-          <input type="number" id="price-input" min="1" step="0.01" value="605" onchange="onPriceChange()"/>
-          <span>ر.س</span>
-        </div>
-        <button class="refresh-btn" id="refresh-btn" onclick="autoFetchPrice()">↻ تحديث</button>
+        <div class="pw"><label data-i="price_lbl">سعر الجرام 24K</label><input type="number" id="price-input" min="1" step="0.01" value="605" onchange="onPriceChange()"/><span data-i="sar">ر.س</span></div>
+        <button class="rbtn" id="refresh-btn" onclick="autoFetchPrice()">↻ <span data-i="refresh">تحديث</span></button>
       </div>
     </div>
-    <div class="metrics">
-      <div class="metric-card"><div class="metric-lbl">إجمالي الوزن 24K</div><div class="metric-val n" id="db-wt">0.00</div><div class="metric-chg" style="color:var(--text3);">جرام</div></div>
-      <div class="metric-card"><div class="metric-lbl">عدد القطع</div><div class="metric-val n" id="db-cnt">0</div><div class="metric-chg" style="color:var(--text3);">قطعة</div></div>
-      <div class="metric-card hl"><div class="metric-lbl">القيمة الحالية</div><div class="metric-val" id="db-cv">0 ر.س</div></div>
-      <div class="metric-card"><div class="metric-lbl">الربح / الخسارة</div><div class="metric-val" id="db-prf">0 ر.س</div><div class="metric-chg" id="db-pct"></div></div>
+    <div class="mets">
+      <div class="mc"><div class="ml" data-i="total_w">إجمالي الوزن 24K</div><div class="mv n" id="db-wt">0.00</div><div class="mch" style="color:var(--text3);" data-i="gram">جرام</div></div>
+      <div class="mc"><div class="ml" data-i="pieces">عدد القطع</div><div class="mv n" id="db-cnt">0</div><div class="mch" style="color:var(--text3);" data-i="piece">قطعة</div></div>
+      <div class="mc hl"><div class="ml" data-i="cur_val">القيمة الحالية</div><div class="mv" id="db-cv">0 ر.س</div></div>
+      <div class="mc"><div class="ml" data-i="profit_lbl">الربح / الخسارة</div><div class="mv" id="db-prf">0 ر.س</div><div class="mch" id="db-pct"></div></div>
     </div>
-    <div class="grid2">
-      <div class="card"><div class="card-hd">آخر المشتريات</div><div class="card-bd" id="db-rec"></div></div>
-      <div class="card"><div class="card-hd">توزيع العيارات</div><div class="card-bd" id="db-kd"></div></div>
+    <div class="g2">
+      <div class="card"><div class="chd" data-i="recent">آخر المشتريات</div><div class="cbd" id="db-rec"></div></div>
+      <div class="card"><div class="chd" data-i="karat_dist">توزيع العيارات</div><div class="cbd" id="db-kd"></div></div>
     </div>
   </div>
 
-  <!-- ADD -->
   <div class="page" id="page-add">
-    <div class="page-header">
-      <div><div class="page-title">تسجيل شراء جديد</div><div class="page-sub">أضف قطعة لمحفظتك</div></div>
-    </div>
-    <div class="grid2">
-      <div class="card"><div class="card-hd">بيانات الشراء</div>
-        <div class="card-bd">
-          <div class="form-grid">
-            <div class="fg full"><label>اسم القطعة</label><input type="text" id="f-name" placeholder="خاتم، أساور، سبيكة..."/></div>
-            <div class="fg"><label>الوزن (جرام)</label><input type="number" id="f-weight" placeholder="0.00" min="0" step="0.01"/></div>
-            <div class="fg"><label>العيار</label>
-              <select id="f-karat">
-                <option value="1">عيار 24 (99.9%)</option>
-                <option value="0.9167">عيار 22 (91.67%)</option>
-                <option value="0.875">عيار 21 (87.5%)</option>
-                <option value="0.75" selected>عيار 18 (75%)</option>
-                <option value="0.625">عيار 15 (62.5%)</option>
-                <option value="0.5833">عيار 14 (58.33%)</option>
-                <option value="0.417">عيار 10 (41.7%)</option>
-              </select>
-            </div>
-            <div class="fg"><label>تاريخ الشراء</label><input type="date" id="f-date"/></div>
-            <div class="fg"><label>سعر الشراء بالريال (اختياري)</label><input type="number" id="f-paid" placeholder="يُحسب تلقائياً بسعر اليوم"/></div>
-            <div class="fg full"><label>ملاحظات</label><textarea id="f-notes" placeholder="محل الشراء، مناسبة..."></textarea></div>
-            <div class="fg full"><button class="btn-gold" onclick="addPurchase()">تسجيل الشراء</button></div>
+    <div class="ph"><div><div class="pt" data-i="nav_add">تسجيل شراء</div><div class="ps" data-i="add_sub">أضف قطعة لمحفظتك</div></div></div>
+    <div class="g2">
+      <div class="card"><div class="chd" data-i="purchase_data">بيانات الشراء</div>
+        <div class="cbd"><div class="fg2">
+          <div class="fg full"><label data-i="item_name">اسم القطعة</label><input type="text" id="f-name" data-ph="name_ph"/></div>
+          <div class="fg"><label data-i="weight_lbl">الوزن (جرام)</label><input type="number" id="f-weight" placeholder="0.00" min="0" step="0.01"/></div>
+          <div class="fg"><label data-i="karat_lbl">العيار</label>
+            <select id="f-karat">
+              <option value="1">24K (99.9%)</option><option value="0.9167">22K (91.67%)</option>
+              <option value="0.875">21K (87.5%)</option><option value="0.75" selected>18K (75%)</option>
+              <option value="0.625">15K (62.5%)</option><option value="0.5833">14K (58.33%)</option>
+              <option value="0.417">10K (41.7%)</option>
+            </select>
           </div>
-        </div>
+          <div class="fg"><label data-i="date_lbl">تاريخ الشراء</label><input type="date" id="f-date" onchange="fetchHistoricalPrice()"/></div>
+          <div class="fg"><label data-i="paid_lbl">سعر الجرام وقت الشراء <span id="hist-price-badge" style="font-size:10px;color:var(--gold-light);"></span></label><input type="number" id="f-paid" data-ph="paid_ph"/></div>
+          <div class="fg full"><label data-i="notes_lbl">ملاحظات</label><textarea id="f-notes" data-ph="notes_ph"></textarea></div>
+          <div class="fg full"><button class="bgold" onclick="addPurchase()" data-i="add_btn">تسجيل الشراء</button></div>
+        </div></div>
       </div>
-      <div class="card"><div class="card-hd">معاينة</div><div class="card-bd" id="prev-bd"><div class="empty-st"><div class="emo">✏️</div><p>أدخل البيانات لترى المعاينة</p></div></div></div>
+      <div class="card"><div class="chd" data-i="preview">معاينة</div><div class="cbd" id="prev-bd"><div class="empty-st"><div class="emo">✏️</div><p data-i="preview_hint">أدخل البيانات لترى المعاينة</p></div></div></div>
     </div>
   </div>
 
-  <!-- HISTORY -->
   <div class="page" id="page-history">
-    <div class="page-header">
-      <div><div class="page-title">سجل المشتريات</div><div class="page-sub" id="hist-cnt">—</div></div>
-    </div>
-    <div class="filter-bar" id="filter-bar"></div>
+    <div class="ph"><div><div class="pt" data-i="nav_hist">سجل المشتريات</div><div class="ps" id="hist-cnt">—</div></div></div>
+    <div class="fbar" id="filter-bar"></div>
     <div class="card">
       <div style="overflow-x:auto;">
-        <table class="hist-table">
+        <table class="ht">
           <thead><tr>
-            <th>التاريخ</th><th>القطعة</th><th>العيار</th>
-            <th>الوزن</th><th>24K</th><th>تكلفة الشراء</th>
-            <th>القيمة الآن</th><th>ربح/خسارة</th><th></th>
+            <th data-i="th_date">التاريخ</th><th data-i="th_item">القطعة</th><th data-i="th_karat">العيار</th>
+            <th data-i="th_weight">الوزن</th><th>24K</th><th data-i="th_cost">تكلفة الشراء</th>
+            <th data-i="th_now">القيمة الآن</th><th data-i="th_pl">ربح/خسارة</th><th></th>
           </tr></thead>
           <tbody id="hist-body"></tbody>
         </table>
       </div>
-      <div class="total-row"><span>الإجمالي</span><span id="hist-tot">—</span></div>
+      <div class="trow"><span data-i="total">الإجمالي</span><span id="hist-tot">—</span></div>
     </div>
   </div>
 
-  <!-- SUMMARY -->
   <div class="page" id="page-summary">
-    <div class="page-header">
-      <div><div class="page-title">ملخص العيارات</div><div class="page-sub">توزيع محفظتك</div></div>
-    </div>
-    <div class="grid2">
-      <div class="card"><div class="card-hd">توزيع الوزن</div><div class="card-bd" id="sum-bars"></div></div>
-      <div class="card"><div class="card-hd">جدول العيارات</div>
+    <div class="ph"><div><div class="pt" data-i="nav_sum">ملخص العيارات</div><div class="ps" data-i="sum_sub">توزيع محفظتك</div></div></div>
+    <div class="g2">
+      <div class="card"><div class="chd" data-i="weight_dist">توزيع الوزن</div><div class="cbd" id="sum-bars"></div></div>
+      <div class="card"><div class="chd" data-i="karat_table">جدول العيارات</div>
         <div style="overflow-x:auto;">
-          <table class="sum-table">
-            <thead><tr><th>العيار</th><th>الوزن الفعلي</th><th>معادل 24K</th><th>القيمة</th><th>التكلفة</th></tr></thead>
+          <table class="st">
+            <thead><tr><th data-i="th_karat">العيار</th><th data-i="th_weight">الوزن</th><th data-i="eq24">معادل 24K</th><th data-i="th_now">القيمة</th><th data-i="th_cost">التكلفة</th></tr></thead>
             <tbody id="sum-tbody"></tbody>
           </table>
-          <div class="total-row"><span>المجموع</span><span id="sum-tot">—</span></div>
+          <div class="trow"><span data-i="total">المجموع</span><span id="sum-tot">—</span></div>
         </div>
       </div>
     </div>
   </div>
 
 </main>
+</div>
 
 <script>
-  // ─── STATE ──────────────────────────────────────────────────────
-  let goldPPG = parseFloat(localStorage.getItem('gold_ppg') || '605');
-  let purchases = JSON.parse(localStorage.getItem('gold_v3') || '[]');
-  let activeFilter = '';
-  let cdInterval;
-  let cdLeft = 300;
+const T={ar:{nav_dash:'لوحة التحكم',nav_add:'تسجيل شراء',nav_hist:'سجل المشتريات',nav_sum:'ملخص العيارات',price_lbl:'سعر الجرام 24K',sar:'ر.س',refresh:'تحديث',total_w:'إجمالي الوزن 24K',gram:'جرام',pieces:'عدد القطع',piece:'قطعة',cur_val:'القيمة الحالية',profit_lbl:'الربح / الخسارة',recent:'آخر المشتريات',karat_dist:'توزيع العيارات',purchase_data:'بيانات الشراء',preview:'معاينة',preview_hint:'أدخل البيانات لترى المعاينة',add_sub:'أضف قطعة لمحفظتك',item_name:'اسم القطعة',name_ph:'خاتم، أساور، سبيكة...',weight_lbl:'الوزن (جرام)',karat_lbl:'العيار',date_lbl:'تاريخ الشراء',paid_lbl:'سعر الجرام وقت الشراء',paid_ph:'يُجلب تلقائياً بتاريخ الشراء',notes_lbl:'ملاحظات',notes_ph:'محل الشراء، مناسبة...',add_btn:'تسجيل الشراء',th_date:'التاريخ',th_item:'القطعة',th_karat:'العيار',th_weight:'الوزن',th_cost:'تكلفة الشراء',th_now:'القيمة الآن',th_pl:'ربح/خسارة',total:'الإجمالي',weight_dist:'توزيع الوزن',karat_table:'جدول العيارات',sum_sub:'توزيع محفظتك',eq24:'معادل 24K',no_purchases:'لا يوجد مشتريات بعد',no_data:'لا توجد بيانات',added:'تم تسجيل الشراء!',del_confirm:'حذف هذا السجل؟',update:'آخر تحديث:',fetching:'جاري التحديث...',next_upd:'تحديث خلال',sec:'ث',records:'سجل',all:'الكل',hist_ok:'✓ ر.س/جرام في',hist_fail:'⚠️ ما أمكن جلب السعر، أدخله يدوياً',hist_fetching:'⏳ جاري الجلب...',karat_word:'عيار',l_title:'محفظة الذهب',l_sub:'أدخل رمز PIN للدخول',l_note_new:'أول مرة؟ أدخل PIN تبي تستخدمه (4 أرقام)',l_note_set:'أعد إدخال PIN للتأكيد',l_wrong:'PIN غلط، حاول مجدداً',l_mismatch:'PIN غير متطابق، حاول مجدداً'},
+en:{nav_dash:'Dashboard',nav_add:'Add Purchase',nav_hist:'History',nav_sum:'Karat Summary',price_lbl:'Price/gram 24K',sar:'SAR',refresh:'Refresh',total_w:'Total Weight 24K',gram:'grams',pieces:'Items',piece:'item',cur_val:'Current Value',profit_lbl:'Profit / Loss',recent:'Recent Purchases',karat_dist:'Karat Distribution',purchase_data:'Purchase Details',preview:'Preview',preview_hint:'Enter details to see preview',add_sub:'Add item to your portfolio',item_name:'Item Name',name_ph:'Ring, bracelet, bar...',weight_lbl:'Weight (grams)',karat_lbl:'Karat',date_lbl:'Purchase Date',paid_lbl:'Price/gram at purchase',paid_ph:'Auto-fetched by date',notes_lbl:'Notes',notes_ph:'Store, occasion...',add_btn:'Add Purchase',th_date:'Date',th_item:'Item',th_karat:'Karat',th_weight:'Weight',th_cost:'Cost',th_now:'Value Now',th_pl:'P/L',total:'Total',weight_dist:'Weight Distribution',karat_table:'Karat Table',sum_sub:'Your portfolio breakdown',eq24:'24K Equiv.',no_purchases:'No purchases yet',no_data:'No data',added:'Purchase added!',del_confirm:'Delete this record?',update:'Updated:',fetching:'Updating...',next_upd:'Update in',sec:'s',records:'records',all:'All',hist_ok:'✓ SAR/gram on',hist_fail:'⚠️ Could not fetch price',hist_fetching:'⏳ Fetching...',karat_word:'Karat',l_title:'Gold Portfolio',l_sub:'Enter PIN to access',l_note_new:'First time? Set a 4-digit PIN',l_note_set:'Re-enter PIN to confirm',l_wrong:'Wrong PIN, try again',l_mismatch:'PINs do not match, try again'}};
 
-  const KN = {"1":"24","0.9167":"22","0.875":"21","0.75":"18","0.625":"15","0.5833":"14","0.417":"10"};
-  const KL = v => "عيار " + (KN[v] || v);
-  const fmt = (n, d=0) => isNaN(n) ? '—' : n.toLocaleString('ar-SA',{minimumFractionDigits:d,maximumFractionDigits:d});
-  const ppg = () => goldPPG;
+let lang=localStorage.getItem('gold_lang')||'ar';
+let t=T[lang];
 
-  function save() { localStorage.setItem('gold_v3', JSON.stringify(purchases)); }
-  function savePPG() { localStorage.setItem('gold_ppg', goldPPG.toString()); }
+function setLang(l){
+  lang=l;t=T[l];
+  localStorage.setItem('gold_lang',l);
+  const ar=l==='ar';
+  document.documentElement.lang=l;
+  document.documentElement.dir=ar?'rtl':'ltr';
+  ['l-ar','l-en','sb-ar','sb-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',(id.includes('ar')&&ar)||(id.includes('en')&&!ar));});
+  document.getElementById('l-title').textContent=t.l_title;
+  document.getElementById('s-title').textContent=t.l_title;
+  applyI18n();updateLoginText();refreshAll();
+}
 
-  // ─── PRICE INPUT ─────────────────────────────────────────────────
-  document.getElementById('price-input').value = goldPPG;
+function applyI18n(){
+  document.querySelectorAll('[data-i]').forEach(el=>{const k=el.getAttribute('data-i');if(t[k]!==undefined)el.textContent=t[k];});
+  document.querySelectorAll('[data-ph]').forEach(el=>{const k=el.getAttribute('data-ph');if(t[k]!==undefined)el.placeholder=t[k];});
+}
 
-  function onPriceChange() {
-    const v = parseFloat(document.getElementById('price-input').value);
-    if (v > 0) { goldPPG = v; savePPG(); refreshAll(); }
+const KN={'1':'24','0.9167':'22','0.875':'21','0.75':'18','0.625':'15','0.5833':'14','0.417':'10'};
+function kL(v){return t.karat_word+' '+(KN[v]||v)+'K';}
+
+let pinVal='',pinStage='check',pinTemp='';
+function updateLoginText(){
+  document.getElementById('l-title').textContent=t.l_title;
+  const stored=localStorage.getItem('gold_pin');
+  if(!stored){document.getElementById('l-sub').textContent=t.l_note_new;pinStage='setup1';}
+  else{document.getElementById('l-sub').textContent=t.l_sub;pinStage='check';}
+  document.getElementById('lerr').textContent='';document.getElementById('lnote').textContent='';
+}
+
+function pp(n){if(pinVal.length>=4)return;pinVal+=n;updDots();if(pinVal.length===4)setTimeout(checkPin,150);}
+function pd(){pinVal=pinVal.slice(0,-1);updDots();}
+function updDots(){for(let i=0;i<4;i++)document.getElementById('d'+i).classList.toggle('filled',i<pinVal.length);}
+
+function checkPin(){
+  const stored=localStorage.getItem('gold_pin');
+  const err=document.getElementById('lerr');
+  if(pinStage==='check'){
+    if(pinVal===stored){launchApp();}
+    else{err.textContent=t.l_wrong;pinVal='';updDots();}
+  }else if(pinStage==='setup1'){
+    pinTemp=pinVal;pinVal='';updDots();
+    document.getElementById('l-sub').textContent=t.l_note_set;pinStage='setup2';
+  }else if(pinStage==='setup2'){
+    if(pinVal===pinTemp){localStorage.setItem('gold_pin',pinVal);launchApp();}
+    else{err.textContent=t.l_mismatch;pinVal='';pinTemp='';updDots();pinStage='setup1';document.getElementById('l-sub').textContent=t.l_note_new;}
   }
+}
 
-  // جلب سعر الذهب من أسرع مصدر يرد — 3 مصادر بالتوازي
-  async function autoFetchPrice() {
-    const btn = document.getElementById('refresh-btn');
-    if (btn) { btn.textContent = '⏳'; btn.classList.add('loading'); }
+function launchApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  applyI18n();autoFetchPrice();renderDashboard();
+}
 
-    const SAR_RATE = 3.75; // ربط الريال بالدولار
+function lockApp(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  pinVal='';updDots();document.getElementById('lerr').textContent='';updateLoginText();
+}
 
-    // دالة مساعدة: تعيد سعر الجرام بالريال أو null
-    const trySource = async (fn) => { try { return await fn(); } catch(_){ return null; } };
+let goldPPG=parseFloat(localStorage.getItem('gold_ppg')||'605');
+let purchases=JSON.parse(localStorage.getItem('gold_v3')||'[]');
+let activeFilter='',cdInterval,cdLeft=60;
 
-    // المصادر الثلاثة تعمل بالتوازي
-    const results = await Promise.allSettled([
+const fmt=(n,d=0)=>isNaN(n)?'—':n.toLocaleString(lang==='ar'?'ar-SA':'en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const ppg=()=>goldPPG;
+function save(){localStorage.setItem('gold_v3',JSON.stringify(purchases));}
+function savePPG(){localStorage.setItem('gold_ppg',goldPPG.toString());}
 
-      // مصدر 1: metals.live — USD/oz مباشر
-      trySource(async () => {
-        const r = await fetch('https://api.metals.live/v1/spot/gold');
-        const d = await r.json();
-        const oz = d?.price;
-        if (oz > 2000 && oz < 6000) return parseFloat(((oz / 31.1035) * SAR_RATE).toFixed(2));
-        return null;
-      }),
+document.getElementById('price-input').value=goldPPG;
+function onPriceChange(){const v=parseFloat(document.getElementById('price-input').value);if(v>0){goldPPG=v;savePPG();refreshAll();}}
 
-      // مصدر 2: gold-api.com — USD/oz
-      trySource(async () => {
-        const r = await fetch('https://api.gold-api.com/price/XAU');
-        const d = await r.json();
-        const oz = d?.price;
-        if (oz > 2000 && oz < 6000) return parseFloat(((oz / 31.1035) * SAR_RATE).toFixed(2));
-        return null;
-      }),
+async function autoFetchPrice(){
+  const btn=document.getElementById('refresh-btn');
+  if(btn){btn.innerHTML='⏳';btn.classList.add('loading');}
+  const SAR=3.75;let fetched=false;
+  if(!fetched){try{const r=await fetch('https://api.metals.live/v1/spot/gold');const d=await r.json();if(d?.price>2000&&d.price<6000){goldPPG=parseFloat(((d.price/31.1035)*SAR).toFixed(2));fetched=true;}}catch(_){}}
+  if(!fetched){try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether-gold&vs_currencies=usd');const d=await r.json();const oz=d?.['tether-gold']?.usd;if(oz>2000&&oz<6000){goldPPG=parseFloat(((oz/31.1035)*SAR).toFixed(2));fetched=true;}}catch(_){}}
+  if(!fetched){try{const r=await fetch('https://open.er-api.com/v6/latest/XAU');const d=await r.json();const s=d?.rates?.SAR;if(s>5000&&s<30000){goldPPG=parseFloat((s/31.1035).toFixed(2));fetched=true;}}catch(_){}}
+  if(!fetched){try{const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json');const d=await r.json();const s=d?.xau?.sar;if(s>5000&&s<30000){goldPPG=parseFloat((s/31.1035).toFixed(2));fetched=true;}}catch(_){}}
+  document.getElementById('price-input').value=goldPPG;
+  savePPG();refreshAll();
+  const now=new Date();
+  const sb=document.getElementById('sb-cd');
+  if(sb)sb.textContent=t.update+' '+now.toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'});
+  if(btn){btn.innerHTML=(fetched?'✓':'↻')+' <span data-i="refresh">'+t.refresh+'</span>';setTimeout(()=>{btn.innerHTML='↻ <span data-i="refresh">'+t.refresh+'</span>';btn.classList.remove('loading');},1500);}
+  startCountdown();
+}
 
-      // مصدر 3: open.er-api.com — XAU/SAR مباشر
-      trySource(async () => {
-        const r = await fetch('https://open.er-api.com/v6/latest/XAU');
-        const d = await r.json();
-        const sarPerOz = d?.rates?.SAR;
-        if (sarPerOz > 5000 && sarPerOz < 25000) return parseFloat((sarPerOz / 31.1035).toFixed(2));
-        return null;
-      }),
-    ]);
+function startCountdown(){
+  clearInterval(cdInterval);cdLeft=60;
+  cdInterval=setInterval(()=>{cdLeft--;const sb=document.getElementById('sb-cd');if(cdLeft<=0){if(sb)sb.textContent=t.fetching;autoFetchPrice();return;}if(sb)sb.textContent=t.next_upd+' '+cdLeft+t.sec;},1000);
+}
 
-    // أخذ أول نتيجة صحيحة
-    let fetched = false;
-    for (const r of results) {
-      const val = r.status === 'fulfilled' ? r.value : null;
-      if (val && val > 400 && val < 2000) {
-        goldPPG = val;
-        fetched = true;
-        break;
-      }
-    }
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.ni')[['dashboard','add','history','summary'].indexOf(id)].classList.add('active');
+  refreshAll();
+}
 
-    // حفظ وتحديث الواجهة
-    document.getElementById('price-input').value = goldPPG;
-    savePPG();
-    refreshAll();
-
-    const now = new Date();
-    const sb = document.getElementById('sb-cd');
-    if (sb) sb.textContent = 'تحديث ' + now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
-
-    if (btn) {
-      btn.textContent = fetched ? '✓' : '↻';
-      setTimeout(() => { btn.textContent = '↻'; btn.classList.remove('loading'); }, 1500);
-    }
-    startCountdown();
-  }
-
-  function startCountdown() {
-    clearInterval(cdInterval);
-    cdLeft = 60; // كل 60 ثانية
-    cdInterval = setInterval(() => {
-      cdLeft--;
-      const sb = document.getElementById('sb-cd');
-      if (cdLeft <= 0) {
-        if (sb) sb.textContent = 'جاري التحديث...';
-        autoFetchPrice();
-        return;
-      }
-      if (sb) sb.textContent = 'تحديث خلال ' + cdLeft + 'ث';
-    }, 1000);
-  }
-
-  // ─── NAVIGATION ──────────────────────────────────────────────────
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    document.getElementById('page-'+id).classList.add('active');
-    const idx=['dashboard','add','history','summary'].indexOf(id);
-    document.querySelectorAll('.nav-item')[idx].classList.add('active');
-    refreshAll();
-  }
-
-  function refreshAll() {
-    renderDashboard();
-    if(document.getElementById('page-history').classList.contains('active')) renderHistory();
-    if(document.getElementById('page-summary').classList.contains('active')) renderSummary();
-    updatePreview();
-  }
-
-  // ─── FORM ─────────────────────────────────────────────────────────
-  ['f-weight','f-karat','f-paid'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.addEventListener('input',updatePreview);
-    el.addEventListener('change',updatePreview);
-  });
-
-  function updatePreview() {
-    const wt=parseFloat(document.getElementById('f-weight').value);
-    const kt=document.getElementById('f-karat').value;
-    const paidRaw=document.getElementById('f-paid').value;
-    const box=document.getElementById('prev-bd');
-    if(!wt||wt<=0){box.innerHTML='<div class="empty-st"><div class="emo">✏️</div><p>أدخل البيانات لترى المعاينة</p></div>';return;}
-    const pur=parseFloat(kt);
-    const w24=wt*pur;
-    const cur=w24*ppg();
-    const paid=paidRaw?parseFloat(paidRaw):cur;
-    const diff=cur-paid;
-    box.innerHTML=`
-      <div class="prev-row"><span class="prev-lbl">العيار</span><span class="prev-val"><span class="badge">${KL(kt)}</span></span></div>
-      <div class="prev-row"><span class="prev-lbl">الوزن الفعلي</span><span class="prev-val">${wt.toFixed(2)} جرام</span></div>
-      <div class="prev-row"><span class="prev-lbl">معادل عيار 24</span><span class="prev-val">${w24.toFixed(2)} جرام</span></div>
-      <div class="prev-row"><span class="prev-lbl">سعر الشراء</span><span class="prev-val">${fmt(paid,2)} ر.س</span></div>
-      <div class="prev-row"><span class="prev-lbl">القيمة الحالية</span><span class="prev-val g">${fmt(cur,2)} ر.س</span></div>
-      <div class="prev-row"><span class="prev-lbl">الربح / الخسارة</span><span class="prev-val" style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff>=0?'+':''}${fmt(diff,2)} ر.س</span></div>`;
-  }
-
-  function addPurchase() {
-    const name=document.getElementById('f-name').value.trim()||'ذهب';
-    const wt=parseFloat(document.getElementById('f-weight').value);
-    const kt=document.getElementById('f-karat').value;
-    const date=document.getElementById('f-date').value||new Date().toISOString().split('T')[0];
-    const paidRaw=document.getElementById('f-paid').value;
-    const notes=document.getElementById('f-notes').value.trim();
-    if(!wt||wt<=0){const el=document.getElementById('f-weight');el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1200);return;}
-    const pur=parseFloat(kt);
-    const w24=wt*pur;
-    const paid=paidRaw?parseFloat(paidRaw):parseFloat((w24*ppg()).toFixed(2));
-    purchases.unshift({id:Date.now(),name,weight:wt,karat:kt,weight24:w24,paid,date,notes});
-    save();
-    ['f-name','f-weight','f-paid','f-notes'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('prev-bd').innerHTML='<div class="empty-st"><div class="emo">✅</div><p>تم تسجيل الشراء!</p></div>';
-    setTimeout(()=>showPage('dashboard'),800);
-  }
-
-  // ─── DASHBOARD ───────────────────────────────────────────────────
-  function renderDashboard() {
-    const p=ppg();
-    let tw=0,tc=0;
-    purchases.forEach(x=>{tw+=x.weight24;tc+=x.paid;});
-    const cv=tw*p, pr=cv-tc, pct=tc>0?pr/tc*100:0;
-    document.getElementById('db-wt').textContent=tw.toFixed(2);
-    document.getElementById('db-cnt').textContent=purchases.length;
-    document.getElementById('db-cv').textContent=fmt(cv,0)+' ر.س';
-    const pe=document.getElementById('db-prf');
-    pe.textContent=(pr>=0?'+':'')+fmt(pr,0)+' ر.س';
-    pe.style.color=pr>=0?'var(--green)':'var(--red)';
-    const pce=document.getElementById('db-pct');
-    pce.textContent=(pct>=0?'▲ ':'▼ ')+Math.abs(pct).toFixed(1)+'%';
-    pce.className='metric-chg '+(pct>=0?'up':'dn');
-    const now=new Date();
-    document.getElementById('db-upd').textContent='آخر تحديث: '+now.toLocaleTimeString('ar-SA');
-
-    const icons=['💍','📿','🏅','🔶','⭐','🌟'];
-    const re=document.getElementById('db-rec');
-    if(!purchases.length){re.innerHTML='<div class="empty-st"><div class="emo">📭</div><p>لا يوجد مشتريات بعد</p></div>';}
-    else{re.innerHTML=purchases.slice(0,5).map((x,i)=>{const c=x.weight24*p,d=c-x.paid;return`<div class="rec-item"><div class="rec-icon">${icons[i%icons.length]}</div><div class="rec-info"><div class="rec-name">${x.name} <span class="badge">${KL(x.karat)}</span></div><div class="rec-detail">${x.date} · ${x.weight.toFixed(2)} جرام</div></div><div style="text-align:left;"><div class="rec-price">${fmt(c,0)} ر.س</div><div class="rec-diff" style="color:${d>=0?'var(--green)':'var(--red)'};">${d>=0?'+':''}${fmt(d,0)}</div></div></div>`;}).join('');}
-
-    const byK={};let tW=0;
-    purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]=0;byK[x.karat]+=x.weight24;tW+=x.weight24;});
-    const ke=document.getElementById('db-kd');
-    const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
-    if(!ks.length){ke.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>لا توجد بيانات</p></div>';}
-    else{ke.innerHTML=ks.map(k=>{const pct2=tW>0?byK[k]/tW*100:0;return`<div class="karat-row"><div class="karat-row-hd"><span class="karat-row-nm">${KL(k)}</span><span class="karat-row-info">${byK[k].toFixed(2)} جرام · ${pct2.toFixed(0)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct2.toFixed(1)}%"></div></div></div>`;}).join('');}
-  }
-
-  // ─── HISTORY ─────────────────────────────────────────────────────
-  function renderHistory() {
-    const fbar=document.getElementById('filter-bar');
-    const karats=[...new Set(purchases.map(p=>p.karat))].sort((a,b)=>parseFloat(b)-parseFloat(a));
-    fbar.innerHTML=`<button class="filter-btn ${activeFilter===''?'active':''}" onclick="setFilter('')">الكل (${purchases.length})</button>`+karats.map(k=>`<button class="filter-btn ${activeFilter===k?'active':''}" onclick="setFilter('${k}')">${KL(k)} (${purchases.filter(p=>p.karat===k).length})</button>`).join('');
-    const list=activeFilter?purchases.filter(p=>p.karat===activeFilter):purchases;
-    document.getElementById('hist-cnt').textContent=list.length+' سجل';
-    const p=ppg();let tc=0;
-    const tb=document.getElementById('hist-body');
-    if(!list.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3);">لا توجد مشتريات</td></tr>';document.getElementById('hist-tot').textContent='—';return;}
-    tb.innerHTML=list.map(x=>{const c=x.weight24*p;tc+=c;const d=c-x.paid;return`<tr><td style="color:var(--text3);white-space:nowrap;">${x.date}</td><td><strong>${x.name}</strong>${x.notes?`<br><small style="color:var(--text3);">${x.notes}</small>`:''}</td><td><span class="badge">${KL(x.karat)}</span></td><td>${x.weight.toFixed(2)} جرام</td><td style="color:var(--text2);">${x.weight24.toFixed(2)}</td><td>${fmt(x.paid,0)} ر.س</td><td style="color:var(--gold-light);font-weight:600;">${fmt(c,0)} ر.س</td><td style="color:${d>=0?'var(--green)':'var(--red)'};font-weight:600;">${d>=0?'+':''}${fmt(d,0)}</td><td><button class="del-btn" onclick="del(${x.id})">✕</button></td></tr>`;}).join('');
-    document.getElementById('hist-tot').textContent=fmt(tc,0)+' ر.س';
-  }
-
-  function setFilter(k){activeFilter=k;renderHistory();}
-  function del(id){if(!confirm('حذف هذا السجل؟'))return;purchases=purchases.filter(p=>p.id!==id);save();renderHistory();renderDashboard();}
-
-  // ─── SUMMARY ─────────────────────────────────────────────────────
-  function renderSummary() {
-    const p=ppg();
-    const byK={};let tW=0,tV=0,tC=0;
-    purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]={wt:0,w24:0,paid:0};byK[x.karat].wt+=x.weight;byK[x.karat].w24+=x.weight24;byK[x.karat].paid+=x.paid;tW+=x.weight24;tC+=x.paid;});
-    tV=tW*p;
-    const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
-    const be=document.getElementById('sum-bars'),te=document.getElementById('sum-tbody');
-    if(!ks.length){be.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>لا توجد بيانات</p></div>';te.innerHTML='<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text3);">لا توجد بيانات</td></tr>';document.getElementById('sum-tot').textContent='—';return;}
-    be.innerHTML=ks.map(k=>{const d=byK[k],pct=tW>0?d.w24/tW*100:0,val=d.w24*p;return`<div class="karat-row"><div class="karat-row-hd"><span class="karat-row-nm">${KL(k)}</span><span class="karat-row-info">${pct.toFixed(1)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="karat-stats"><span>الوزن: ${d.wt.toFixed(2)} جرام</span><span>24K: ${d.w24.toFixed(2)} جرام</span><span style="color:var(--gold-light);">القيمة: ${fmt(val,0)} ر.س</span></div></div>`;}).join('');
-    te.innerHTML=ks.map(k=>{const d=byK[k],val=d.w24*p;return`<tr><td><span class="badge">${KL(k)}</span></td><td>${d.wt.toFixed(2)} جرام</td><td>${d.w24.toFixed(2)} جرام</td><td style="color:var(--gold-light);font-weight:600;">${fmt(val,0)} ر.س</td><td style="color:var(--text3);">${fmt(d.paid,0)} ر.س</td></tr>`;}).join('');
-    document.getElementById('sum-tot').textContent=fmt(tV,0)+' ر.س';
-  }
-
-  // ─── INIT ─────────────────────────────────────────────────────────
-  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+function refreshAll(){
   renderDashboard();
-  autoFetchPrice();
+  if(document.getElementById('page-history').classList.contains('active'))renderHistory();
+  if(document.getElementById('page-summary').classList.contains('active'))renderSummary();
+  updatePreview();
+}
+
+['f-weight','f-karat','f-paid'].forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',updatePreview);el.addEventListener('change',updatePreview);});
+
+async function fetchHistoricalPrice(){
+  const date=document.getElementById('f-date').value;
+  const badge=document.getElementById('hist-price-badge');
+  const paidEl=document.getElementById('f-paid');
+  if(!date)return;
+  const today=new Date().toISOString().split('T')[0];
+  if(date>=today){paidEl.placeholder=t.paid_ph;if(badge)badge.textContent='';updatePreview();return;}
+  if(badge)badge.textContent=t.hist_fetching;
+  let done=false;
+  if(!done){try{const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@'+date+'/v1/currencies/xau.json');const d=await r.json();const s=d?.xau?.sar;if(s>3000&&s<30000){const sg=parseFloat((s/31.1035).toFixed(2));const wt=parseFloat(document.getElementById('f-weight').value),kt=parseFloat(document.getElementById('f-karat').value);if(wt>0&&kt>0)paidEl.value=parseFloat((wt*kt*sg).toFixed(2));else paidEl.placeholder=sg+' '+t.sar;if(badge)badge.textContent=t.hist_ok+' '+date;done=true;updatePreview();}}catch(_){}}
+  if(!done){try{const r=await fetch('https://api.metals.live/v1/spot/gold/'+date);const d=await r.json();const u=Array.isArray(d)?d[0]?.gold:d?.price;if(u>500){const sg=parseFloat(((u/31.1035)*3.75).toFixed(2));const wt=parseFloat(document.getElementById('f-weight').value),kt=parseFloat(document.getElementById('f-karat').value);if(wt>0&&kt>0)paidEl.value=parseFloat((wt*kt*sg).toFixed(2));else paidEl.placeholder=sg+' '+t.sar;if(badge)badge.textContent=t.hist_ok+' '+date;done=true;updatePreview();}}catch(_){}}
+  if(!done){if(badge)badge.textContent=t.hist_fail;paidEl.placeholder=t.paid_ph;}
+}
+
+function updatePreview(){
+  const wt=parseFloat(document.getElementById('f-weight').value);
+  const kt=document.getElementById('f-karat').value;
+  const paidRaw=document.getElementById('f-paid').value;
+  const box=document.getElementById('prev-bd');
+  if(!wt||wt<=0){box.innerHTML='<div class="empty-st"><div class="emo">✏️</div><p>'+t.preview_hint+'</p></div>';return;}
+  const pur=parseFloat(kt),w24=wt*pur,cur=w24*ppg();
+  const paid=paidRaw?parseFloat(paidRaw):cur,diff=cur-paid;
+  box.innerHTML=`<div class="pr"><span class="prl">${t.karat_lbl}</span><span class="prv"><span class="badge">${kL(kt)}</span></span></div><div class="pr"><span class="prl">${t.weight_lbl}</span><span class="prv">${wt.toFixed(2)} ${t.gram}</span></div><div class="pr"><span class="prl">${t.eq24}</span><span class="prv">${w24.toFixed(2)} ${t.gram}</span></div><div class="pr"><span class="prl">${t.paid_lbl}</span><span class="prv">${fmt(paid,2)} ${t.sar}</span></div><div class="pr"><span class="prl">${t.cur_val}</span><span class="prv g">${fmt(cur,2)} ${t.sar}</span></div><div class="pr"><span class="prl">${t.profit_lbl}</span><span class="prv" style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff>=0?'+':''}${fmt(diff,2)} ${t.sar}</span></div>`;
+}
+
+function addPurchase(){
+  const name=document.getElementById('f-name').value.trim()||'Gold';
+  const wt=parseFloat(document.getElementById('f-weight').value);
+  const kt=document.getElementById('f-karat').value;
+  const date=document.getElementById('f-date').value||new Date().toISOString().split('T')[0];
+  const paidRaw=document.getElementById('f-paid').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  if(!wt||wt<=0){const el=document.getElementById('f-weight');el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1200);return;}
+  const pur=parseFloat(kt),w24=wt*pur;
+  const paid=paidRaw?parseFloat(paidRaw):parseFloat((w24*ppg()).toFixed(2));
+  purchases.unshift({id:Date.now(),name,weight:wt,karat:kt,weight24:w24,paid,date,notes});
+  save();
+  ['f-name','f-weight','f-paid','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('prev-bd').innerHTML='<div class="empty-st"><div class="emo">✅</div><p>'+t.added+'</p></div>';
+  setTimeout(()=>showPage('dashboard'),800);
+}
+
+function renderDashboard(){
+  const p=ppg();let tw=0,tc=0;
+  purchases.forEach(x=>{tw+=x.weight24;tc+=x.paid;});
+  const cv=tw*p,pr=cv-tc,pct=tc>0?pr/tc*100:0;
+  document.getElementById('db-wt').textContent=tw.toFixed(2);
+  document.getElementById('db-cnt').textContent=purchases.length;
+  document.getElementById('db-cv').textContent=fmt(cv,0)+' '+t.sar;
+  const pe=document.getElementById('db-prf');pe.textContent=(pr>=0?'+':'')+fmt(pr,0)+' '+t.sar;pe.style.color=pr>=0?'var(--green)':'var(--red)';
+  const pce=document.getElementById('db-pct');pce.textContent=(pct>=0?'▲ ':'▼ ')+Math.abs(pct).toFixed(1)+'%';pce.className='mch '+(pct>=0?'up':'dn');
+  document.getElementById('db-upd').textContent=t.update+' '+new Date().toLocaleTimeString(lang==='ar'?'ar-SA':'en-US');
+  const icons=['💍','📿','🏅','🔶','⭐','🌟'];
+  const re=document.getElementById('db-rec');
+  if(!purchases.length){re.innerHTML='<div class="empty-st"><div class="emo">📭</div><p>'+t.no_purchases+'</p></div>';}
+  else{re.innerHTML=purchases.slice(0,5).map((x,i)=>{const c=x.weight24*p,d=c-x.paid;return`<div class="ri"><div class="ric">${icons[i%icons.length]}</div><div class="rinf"><div class="rnm">${x.name} <span class="badge">${kL(x.karat)}</span></div><div class="rdt">${x.date} · ${x.weight.toFixed(2)} ${t.gram}</div></div><div style="text-align:${lang==='ar'?'left':'right'};"><div class="rpr">${fmt(c,0)} ${t.sar}</div><div class="rdf" style="color:${d>=0?'var(--green)':'var(--red)'};">${d>=0?'+':''}${fmt(d,0)}</div></div></div>`;}).join('');}
+  const byK={};let tW=0;purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]=0;byK[x.karat]+=x.weight24;tW+=x.weight24;});
+  const ke=document.getElementById('db-kd');const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
+  if(!ks.length){ke.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>'+t.no_data+'</p></div>';}
+  else{ke.innerHTML=ks.map(k=>{const p2=tW>0?byK[k]/tW*100:0;return`<div class="kr"><div class="krhd"><span class="krnm">${kL(k)}</span><span class="krinfo">${byK[k].toFixed(2)} ${t.gram} · ${p2.toFixed(0)}%</span></div><div class="btr"><div class="bfill" style="width:${p2.toFixed(1)}%"></div></div></div>`;}).join('');}
+}
+
+function renderHistory(){
+  const fbar=document.getElementById('filter-bar');
+  const karats=[...new Set(purchases.map(p=>p.karat))].sort((a,b)=>parseFloat(b)-parseFloat(a));
+  fbar.innerHTML=`<button class="fbtn ${activeFilter===''?'active':''}" onclick="setFilter('')">${t.all} (${purchases.length})</button>`+karats.map(k=>`<button class="fbtn ${activeFilter===k?'active':''}" onclick="setFilter('${k}')">${kL(k)} (${purchases.filter(p=>p.karat===k).length})</button>`).join('');
+  const list=activeFilter?purchases.filter(p=>p.karat===activeFilter):purchases;
+  document.getElementById('hist-cnt').textContent=list.length+' '+t.records;
+  const p=ppg();let tc=0;const tb=document.getElementById('hist-body');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3);">${t.no_purchases}</td></tr>`;document.getElementById('hist-tot').textContent='—';return;}
+  tb.innerHTML=list.map(x=>{const c=x.weight24*p;tc+=c;const d=c-x.paid;return`<tr><td style="color:var(--text3);white-space:nowrap;">${x.date}</td><td><strong>${x.name}</strong>${x.notes?`<br><small style="color:var(--text3);">${x.notes}</small>`:''}</td><td><span class="badge">${kL(x.karat)}</span></td><td>${x.weight.toFixed(2)} ${t.gram}</td><td style="color:var(--text2);">${x.weight24.toFixed(2)}</td><td>${fmt(x.paid,0)} ${t.sar}</td><td style="color:var(--gold-light);font-weight:600;">${fmt(c,0)} ${t.sar}</td><td style="color:${d>=0?'var(--green)':'var(--red)'};font-weight:600;">${d>=0?'+':''}${fmt(d,0)}</td><td><button class="dbtn" onclick="del(${x.id})">✕</button></td></tr>`;}).join('');
+  document.getElementById('hist-tot').textContent=fmt(tc,0)+' '+t.sar;
+}
+
+function setFilter(k){activeFilter=k;renderHistory();}
+function del(id){if(!confirm(t.del_confirm))return;purchases=purchases.filter(p=>p.id!==id);save();renderHistory();renderDashboard();}
+
+function renderSummary(){
+  const p=ppg();const byK={};let tW=0,tC=0;
+  purchases.forEach(x=>{if(!byK[x.karat])byK[x.karat]={wt:0,w24:0,paid:0};byK[x.karat].wt+=x.weight;byK[x.karat].w24+=x.weight24;byK[x.karat].paid+=x.paid;tW+=x.weight24;tC+=x.paid;});
+  const tV=tW*p;const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
+  const be=document.getElementById('sum-bars'),te=document.getElementById('sum-tbody');
+  if(!ks.length){be.innerHTML='<div class="empty-st"><div class="emo">📊</div><p>'+t.no_data+'</p></div>';te.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text3);">${t.no_data}</td></tr>`;document.getElementById('sum-tot').textContent='—';return;}
+  be.innerHTML=ks.map(k=>{const d=byK[k],pct=tW>0?d.w24/tW*100:0,val=d.w24*p;return`<div class="kr"><div class="krhd"><span class="krnm">${kL(k)}</span><span class="krinfo">${pct.toFixed(1)}%</span></div><div class="btr"><div class="bfill" style="width:${pct.toFixed(1)}%"></div></div><div class="kstats"><span>${t.weight_lbl}: ${d.wt.toFixed(2)} ${t.gram}</span><span>24K: ${d.w24.toFixed(2)} ${t.gram}</span><span style="color:var(--gold-light);">${t.cur_val}: ${fmt(val,0)} ${t.sar}</span></div></div>`;}).join('');
+  te.innerHTML=ks.map(k=>{const d=byK[k],val=d.w24*p;return`<tr><td><span class="badge">${kL(k)}</span></td><td>${d.wt.toFixed(2)} ${t.gram}</td><td>${d.w24.toFixed(2)} ${t.gram}</td><td style="color:var(--gold-light);font-weight:600;">${fmt(val,0)} ${t.sar}</td><td style="color:var(--text3);">${fmt(d.paid,0)} ${t.sar}</td></tr>`;}).join('');
+  document.getElementById('sum-tot').textContent=fmt(tV,0)+' '+t.sar;
+}
+
+setLang(lang);
+updateLoginText();
+document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
 </script>
 </body>
 </html>
