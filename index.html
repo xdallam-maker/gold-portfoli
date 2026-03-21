@@ -37,7 +37,7 @@
   .ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);cursor:pointer;font-size:13px;color:var(--text2);border:1px solid transparent;transition:all .2s;}
   .ni:hover{background:var(--bg3);color:var(--text);}
   .ni.active{background:rgba(201,150,42,.12);border-color:var(--border2);color:var(--gold-light);}
-  .ni-icon{font-size:15px;width:20px;text-align:center;}
+  .ni-icon{width:20px;text-align:center;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .sfooter{padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
   .sb-acts{display:flex;gap:5px;margin-top:7px;}
   .sbb{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Tajawal',sans-serif;text-align:center;transition:all .2s;}
@@ -157,10 +157,11 @@
     <p>Gold Portfolio</p>
   </div>
   <nav class="nav">
-    <div class="ni active" onclick="showPage('dashboard')"><span class="ni-icon">◈</span><span data-i="nav_dash">لوحة التحكم</span></div>
-    <div class="ni" onclick="showPage('add')"><span class="ni-icon">＋</span><span data-i="nav_add">تسجيل شراء</span></div>
-    <div class="ni" onclick="showPage('history')"><span class="ni-icon">≡</span><span data-i="nav_hist">سجل المشتريات</span></div>
-    <div class="ni" onclick="showPage('summary')"><span class="ni-icon">◎</span><span data-i="nav_sum">ملخص العيارات</span></div>
+    <div class="ni active" onclick="showPage('dashboard')"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span data-i="nav_dash">لوحة التحكم</span></div>
+    <div class="ni" onclick="showPage('add')"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span><span data-i="nav_add">تسجيل شراء</span></div>
+    <div class="ni" onclick="showPage('history')"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></span><span data-i="nav_hist">سجل المشتريات</span></div>
+    <div class="ni" onclick="showPage('summary')"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 12 L18 12"/></svg></span><span data-i="nav_sum">ملخص العيارات</span></div>
+    <div class="ni" onclick="showPage('analytics')"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><line x1="3" y1="21" x2="21" y2="21"/></svg></span><span data-i="nav_analytics">التحليلات</span></div>
   </nav>
   <div class="sfooter">
     <span class="dot"></span><span id="sb-cd">مباشر</span>
@@ -253,12 +254,46 @@
     </div>
   </div>
 
+  <!-- ANALYTICS PAGE -->
+  <div class="page" id="page-analytics">
+    <div class="ph"><div><div class="pt" data-i="nav_analytics">التحليلات</div><div class="ps" data-i="analytics_sub">رسم بياني، زكاة، متوسط السعر</div></div></div>
+
+    <!-- STATS ROW -->
+    <div class="mets" style="grid-template-columns:repeat(3,1fr);">
+      <div class="mc"><div class="ml" data-i="avg_price">متوسط سعر الشراء</div><div class="mv" id="an-avg">—</div><div class="mch" style="color:var(--text3);" data-i="sar">ر.س</div></div>
+      <div class="mc hl"><div class="ml" data-i="best_deal">أفضل صفقة</div><div class="mv n" id="an-best" style="font-size:14px;">—</div></div>
+      <div class="mc"><div class="ml" data-i="zakat_lbl">الزكاة المستحقة</div><div class="mv" id="an-zakat" style="color:var(--green);">—</div><div class="mch" style="color:var(--text3);" id="an-zakat-note"></div></div>
+    </div>
+
+    <!-- CHART -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="chd" data-i="portfolio_chart">تطور قيمة المحفظة</div>
+      <div class="cbd" style="padding:12px;">
+        <canvas id="portfolio-chart" style="width:100%;max-height:280px;"></canvas>
+        <div id="chart-empty" class="empty-st" style="display:none;"><div class="emo">📈</div><p data-i="no_data_chart">أضف مشتريات لرؤية الرسم البياني</p></div>
+      </div>
+    </div>
+
+    <!-- ZAKAT DETAIL -->
+    <div class="g2">
+      <div class="card">
+        <div class="chd" data-i="zakat_detail">تفاصيل الزكاة</div>
+        <div class="cbd" id="zakat-detail"></div>
+      </div>
+      <div class="card">
+        <div class="chd" data-i="avg_by_karat">متوسط السعر حسب العيار</div>
+        <div class="cbd" id="avg-by-karat"></div>
+      </div>
+    </div>
+  </div>
+
 </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const T={ar:{nav_dash:'لوحة التحكم',nav_add:'تسجيل شراء',nav_hist:'سجل المشتريات',nav_sum:'ملخص العيارات',price_lbl:'سعر الجرام 24K',sar:'ر.س',refresh:'تحديث',total_w:'إجمالي الوزن 24K',gram:'جرام',pieces:'عدد القطع',piece:'قطعة',cur_val:'القيمة الحالية',profit_lbl:'الربح / الخسارة',recent:'آخر المشتريات',karat_dist:'توزيع العيارات',purchase_data:'بيانات الشراء',preview:'معاينة',preview_hint:'أدخل البيانات لترى المعاينة',add_sub:'أضف قطعة لمحفظتك',item_name:'اسم القطعة',name_ph:'خاتم، أساور، سبيكة...',weight_lbl:'الوزن (جرام)',karat_lbl:'العيار',date_lbl:'تاريخ الشراء',paid_lbl:'سعر الجرام وقت الشراء',paid_ph:'يُجلب تلقائياً بتاريخ الشراء',notes_lbl:'ملاحظات',notes_ph:'محل الشراء، مناسبة...',add_btn:'تسجيل الشراء',th_date:'التاريخ',th_item:'القطعة',th_karat:'العيار',th_weight:'الوزن',th_cost:'تكلفة الشراء',th_now:'القيمة الآن',th_pl:'ربح/خسارة',total:'الإجمالي',weight_dist:'توزيع الوزن',karat_table:'جدول العيارات',sum_sub:'توزيع محفظتك',eq24:'معادل 24K',no_purchases:'لا يوجد مشتريات بعد',no_data:'لا توجد بيانات',added:'تم تسجيل الشراء!',del_confirm:'حذف هذا السجل؟',update:'آخر تحديث:',fetching:'جاري التحديث...',next_upd:'تحديث خلال',sec:'ث',records:'سجل',all:'الكل',hist_ok:'✓ ر.س/جرام في',hist_fail:'⚠️ ما أمكن جلب السعر، أدخله يدوياً',hist_fetching:'⏳ جاري الجلب...',karat_word:'عيار',l_title:'محفظة الذهب',l_sub:'أدخل رمز PIN للدخول',l_note_new:'أول مرة؟ أدخل PIN تبي تستخدمه (4 أرقام)',l_note_set:'أعد إدخال PIN للتأكيد',l_wrong:'PIN غلط، حاول مجدداً',l_mismatch:'PIN غير متطابق، حاول مجدداً'},
-en:{nav_dash:'Dashboard',nav_add:'Add Purchase',nav_hist:'History',nav_sum:'Karat Summary',price_lbl:'Price/gram 24K',sar:'SAR',refresh:'Refresh',total_w:'Total Weight 24K',gram:'grams',pieces:'Items',piece:'item',cur_val:'Current Value',profit_lbl:'Profit / Loss',recent:'Recent Purchases',karat_dist:'Karat Distribution',purchase_data:'Purchase Details',preview:'Preview',preview_hint:'Enter details to see preview',add_sub:'Add item to your portfolio',item_name:'Item Name',name_ph:'Ring, bracelet, bar...',weight_lbl:'Weight (grams)',karat_lbl:'Karat',date_lbl:'Purchase Date',paid_lbl:'Price/gram at purchase',paid_ph:'Auto-fetched by date',notes_lbl:'Notes',notes_ph:'Store, occasion...',add_btn:'Add Purchase',th_date:'Date',th_item:'Item',th_karat:'Karat',th_weight:'Weight',th_cost:'Cost',th_now:'Value Now',th_pl:'P/L',total:'Total',weight_dist:'Weight Distribution',karat_table:'Karat Table',sum_sub:'Your portfolio breakdown',eq24:'24K Equiv.',no_purchases:'No purchases yet',no_data:'No data',added:'Purchase added!',del_confirm:'Delete this record?',update:'Updated:',fetching:'Updating...',next_upd:'Update in',sec:'s',records:'records',all:'All',hist_ok:'✓ SAR/gram on',hist_fail:'⚠️ Could not fetch price',hist_fetching:'⏳ Fetching...',karat_word:'Karat',l_title:'Gold Portfolio',l_sub:'Enter PIN to access',l_note_new:'First time? Set a 4-digit PIN',l_note_set:'Re-enter PIN to confirm',l_wrong:'Wrong PIN, try again',l_mismatch:'PINs do not match, try again'}};
+const T={ar:{nav_dash:'لوحة التحكم',nav_add:'تسجيل شراء',nav_hist:'سجل المشتريات',nav_sum:'ملخص العيارات',price_lbl:'سعر الجرام 24K',sar:'ر.س',refresh:'تحديث',total_w:'إجمالي الوزن 24K',gram:'جرام',pieces:'عدد القطع',piece:'قطعة',cur_val:'القيمة الحالية',profit_lbl:'الربح / الخسارة',recent:'آخر المشتريات',karat_dist:'توزيع العيارات',purchase_data:'بيانات الشراء',preview:'معاينة',preview_hint:'أدخل البيانات لترى المعاينة',add_sub:'أضف قطعة لمحفظتك',item_name:'اسم القطعة',name_ph:'خاتم، أساور، سبيكة...',weight_lbl:'الوزن (جرام)',karat_lbl:'العيار',date_lbl:'تاريخ الشراء',paid_lbl:'سعر الجرام وقت الشراء',paid_ph:'يُجلب تلقائياً بتاريخ الشراء',notes_lbl:'ملاحظات',notes_ph:'محل الشراء، مناسبة...',add_btn:'تسجيل الشراء',th_date:'التاريخ',th_item:'القطعة',th_karat:'العيار',th_weight:'الوزن',th_cost:'تكلفة الشراء',th_now:'القيمة الآن',th_pl:'ربح/خسارة',total:'الإجمالي',weight_dist:'توزيع الوزن',karat_table:'جدول العيارات',sum_sub:'توزيع محفظتك',eq24:'معادل 24K',no_purchases:'لا يوجد مشتريات بعد',no_data:'لا توجد بيانات',added:'تم تسجيل الشراء!',del_confirm:'حذف هذا السجل؟',update:'آخر تحديث:',fetching:'جاري التحديث...',next_upd:'تحديث خلال',sec:'ث',records:'سجل',all:'الكل',hist_ok:'✓ ر.س/جرام في',hist_fail:'⚠️ ما أمكن جلب السعر، أدخله يدوياً',hist_fetching:'⏳ جاري الجلب...',karat_word:'عيار',l_title:'محفظة الذهب',l_sub:'أدخل رمز PIN للدخول',l_note_new:'أول مرة؟ أدخل PIN تبي تستخدمه (4 أرقام)',l_note_set:'أعد إدخال PIN للتأكيد',l_wrong:'PIN غلط، حاول مجدداً',l_mismatch:'PIN غير متطابق، حاول مجدداً',nav_analytics:'التحليلات',analytics_sub:'رسم بياني، زكاة، متوسط السعر',avg_price:'متوسط سعر الشراء (ر.س/جرام)',best_deal:'أفضل صفقة',zakat_lbl:'الزكاة المستحقة',portfolio_chart:'تطور قيمة المحفظة',no_data_chart:'أضف مشتريات لرؤية الرسم البياني',zakat_detail:'تفاصيل الزكاة',avg_by_karat:'متوسط السعر حسب العيار',zakat_nisab:'النصاب (85 جرام ذهب 24K)',zakat_rate:'نسبة الزكاة (2.5%)',zakat_eligible:'محفظتك بلغت النصاب',zakat_not_eligible:'محفظتك لم تبلغ النصاب بعد',gram_24k:'جرام (24K)'},
+en:{nav_dash:'Dashboard',nav_add:'Add Purchase',nav_hist:'History',nav_sum:'Karat Summary',price_lbl:'Price/gram 24K',sar:'SAR',refresh:'Refresh',total_w:'Total Weight 24K',gram:'grams',pieces:'Items',piece:'item',cur_val:'Current Value',profit_lbl:'Profit / Loss',recent:'Recent Purchases',karat_dist:'Karat Distribution',purchase_data:'Purchase Details',preview:'Preview',preview_hint:'Enter details to see preview',add_sub:'Add item to your portfolio',item_name:'Item Name',name_ph:'Ring, bracelet, bar...',weight_lbl:'Weight (grams)',karat_lbl:'Karat',date_lbl:'Purchase Date',paid_lbl:'Price/gram at purchase',paid_ph:'Auto-fetched by date',notes_lbl:'Notes',notes_ph:'Store, occasion...',add_btn:'Add Purchase',th_date:'Date',th_item:'Item',th_karat:'Karat',th_weight:'Weight',th_cost:'Cost',th_now:'Value Now',th_pl:'P/L',total:'Total',weight_dist:'Weight Distribution',karat_table:'Karat Table',sum_sub:'Your portfolio breakdown',eq24:'24K Equiv.',no_purchases:'No purchases yet',no_data:'No data',added:'Purchase added!',del_confirm:'Delete this record?',update:'Updated:',fetching:'Updating...',next_upd:'Update in',sec:'s',records:'records',all:'All',hist_ok:'✓ SAR/gram on',hist_fail:'⚠️ Could not fetch price',hist_fetching:'⏳ Fetching...',karat_word:'Karat',l_title:'Gold Portfolio',l_sub:'Enter PIN to access',l_note_new:'First time? Set a 4-digit PIN',l_note_set:'Re-enter PIN to confirm',l_wrong:'Wrong PIN, try again',l_mismatch:'PINs do not match, try again',nav_analytics:'Analytics',analytics_sub:'Chart, Zakat, Avg Price',avg_price:'Avg Purchase Price (SAR/g)',best_deal:'Best Deal',zakat_lbl:'Zakat Due',portfolio_chart:'Portfolio Value Over Time',no_data_chart:'Add purchases to see the chart',zakat_detail:'Zakat Details',avg_by_karat:'Avg Price by Karat',zakat_nisab:'Nisab (85g of 24K gold)',zakat_rate:'Zakat rate (2.5%)',zakat_eligible:'Portfolio reached Nisab',zakat_not_eligible:'Portfolio below Nisab',gram_24k:'grams (24K)'}};
 
 let lang=localStorage.getItem('gold_lang')||'ar';
 let t=T[lang];
@@ -361,7 +396,7 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.ni')[['dashboard','add','history','summary'].indexOf(id)].classList.add('active');
+  document.querySelectorAll('.ni')[['dashboard','add','history','summary','analytics'].indexOf(id)].classList.add('active');
   refreshAll();
 }
 
@@ -369,6 +404,7 @@ function refreshAll(){
   renderDashboard();
   if(document.getElementById('page-history').classList.contains('active'))renderHistory();
   if(document.getElementById('page-summary').classList.contains('active'))renderSummary();
+  if(document.getElementById('page-analytics').classList.contains('active'))renderAnalytics();
   updatePreview();
 }
 
@@ -460,6 +496,146 @@ function renderSummary(){
   be.innerHTML=ks.map(k=>{const d=byK[k],pct=tW>0?d.w24/tW*100:0,val=d.w24*p;return`<div class="kr"><div class="krhd"><span class="krnm">${kL(k)}</span><span class="krinfo">${pct.toFixed(1)}%</span></div><div class="btr"><div class="bfill" style="width:${pct.toFixed(1)}%"></div></div><div class="kstats"><span>${t.weight_lbl}: ${d.wt.toFixed(2)} ${t.gram}</span><span>24K: ${d.w24.toFixed(2)} ${t.gram}</span><span style="color:var(--gold-light);">${t.cur_val}: ${fmt(val,0)} ${t.sar}</span></div></div>`;}).join('');
   te.innerHTML=ks.map(k=>{const d=byK[k],val=d.w24*p;return`<tr><td><span class="badge">${kL(k)}</span></td><td>${d.wt.toFixed(2)} ${t.gram}</td><td>${d.w24.toFixed(2)} ${t.gram}</td><td style="color:var(--gold-light);font-weight:600;">${fmt(val,0)} ${t.sar}</td><td style="color:var(--text3);">${fmt(d.paid,0)} ${t.sar}</td></tr>`;}).join('');
   document.getElementById('sum-tot').textContent=fmt(tV,0)+' '+t.sar;
+}
+
+let portfolioChart = null;
+
+function renderAnalytics(){
+  const p = ppg();
+  if(!purchases.length){
+    document.getElementById('an-avg').textContent='—';
+    document.getElementById('an-best').textContent='—';
+    document.getElementById('an-zakat').textContent='—';
+    document.getElementById('an-zakat-note').textContent='';
+    document.getElementById('zakat-detail').innerHTML='<div class="empty-st"><div class="emo">📊</div><p>'+t.no_data+'</p></div>';
+    document.getElementById('avg-by-karat').innerHTML='<div class="empty-st"><div class="emo">📊</div><p>'+t.no_data+'</p></div>';
+    document.getElementById('chart-empty').style.display='block';
+    document.getElementById('portfolio-chart').style.display='none';
+    return;
+  }
+
+  // ── متوسط السعر الكلي
+  let totalW24=0, totalCost=0;
+  purchases.forEach(x=>{totalW24+=x.weight24; totalCost+=x.paid;});
+  const avgPrice = totalW24>0 ? totalCost/totalW24 : 0;
+  document.getElementById('an-avg').textContent = fmt(avgPrice,2);
+
+  // ── أفضل صفقة (أقل سعر شراء/جرام24)
+  let best = null;
+  purchases.forEach(x=>{
+    const pp2 = x.weight24>0 ? x.paid/x.weight24 : 999999;
+    if(!best || pp2 < best.pp) best={x, pp:pp2};
+  });
+  if(best) document.getElementById('an-best').textContent = best.x.name + ' — ' + fmt(best.pp,0) + ' '+t.sar;
+
+  // ── الزكاة (النصاب = 85 جرام ذهب عيار 24)
+  const NISAB_GRAMS = 85;
+  const nisabValue = NISAB_GRAMS * p;
+  const curVal = totalW24 * p;
+  const zakatDue = curVal >= nisabValue ? curVal * 0.025 : 0;
+  const zakatEl = document.getElementById('an-zakat');
+  const zakatNote = document.getElementById('an-zakat-note');
+  if(curVal >= nisabValue){
+    zakatEl.textContent = fmt(zakatDue,2) + ' '+t.sar;
+    zakatEl.style.color='var(--green)';
+    zakatNote.textContent = t.zakat_eligible;
+  } else {
+    zakatEl.textContent = '—';
+    zakatEl.style.color='var(--text3)';
+    zakatNote.textContent = t.zakat_not_eligible;
+  }
+
+  // ── تفاصيل الزكاة
+  const zd = document.getElementById('zakat-detail');
+  zd.innerHTML = `
+    <div class="pr"><span class="prl">${t.zakat_nisab}</span><span class="prv">${NISAB_GRAMS} ${t.gram_24k}</span></div>
+    <div class="pr"><span class="prl">${t.zakat_nisab} (${t.sar})</span><span class="prv">${fmt(nisabValue,0)} ${t.sar}</span></div>
+    <div class="pr"><span class="prl">${t.cur_val}</span><span class="prv g">${fmt(curVal,0)} ${t.sar}</span></div>
+    <div class="pr"><span class="prl">${t.zakat_rate}</span><span class="prv" style="color:${zakatDue>0?'var(--green)':'var(--text3)'};">${fmt(zakatDue,2)} ${t.sar}</span></div>
+  `;
+
+  // ── متوسط السعر حسب العيار
+  const byK={};
+  purchases.forEach(x=>{
+    if(!byK[x.karat]) byK[x.karat]={totalCost:0,totalW24:0};
+    byK[x.karat].totalCost+=x.paid;
+    byK[x.karat].totalW24+=x.weight24;
+  });
+  const ks=Object.keys(byK).sort((a,b)=>parseFloat(b)-parseFloat(a));
+  const avgEl = document.getElementById('avg-by-karat');
+  avgEl.innerHTML = ks.map(k=>{
+    const d=byK[k], avg=d.totalW24>0?d.totalCost/d.totalW24:0;
+    const curPPG = p;
+    const diff = curPPG - avg;
+    return `<div class="pr">
+      <span class="prl">${kL(k)}</span>
+      <span class="prv">
+        ${fmt(avg,0)} ${t.sar}
+        <span style="font-size:10px;font-weight:400;color:${diff>=0?'var(--green)':'var(--red)'};">
+          ${diff>=0?'▲':'▼'} ${fmt(Math.abs(diff),0)}
+        </span>
+      </span>
+    </div>`;
+  }).join('');
+
+  // ── الرسم البياني (تطور القيمة بالتواريخ)
+  const sorted = [...purchases].sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=[], values=[], costs=[];
+  let runW24=0, runCost=0;
+  sorted.forEach(x=>{
+    runW24+=x.weight24; runCost+=x.paid;
+    labels.push(x.date);
+    values.push(parseFloat((runW24*p).toFixed(0)));
+    costs.push(parseFloat(runCost.toFixed(0)));
+  });
+
+  document.getElementById('chart-empty').style.display='none';
+  const canvas = document.getElementById('portfolio-chart');
+  canvas.style.display='block';
+
+  if(portfolioChart) portfolioChart.destroy();
+  portfolioChart = new Chart(canvas, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {
+          label: t.cur_val,
+          data: values,
+          borderColor:'#E8B84B',
+          backgroundColor:'rgba(232,184,75,0.1)',
+          borderWidth:2,
+          pointBackgroundColor:'#E8B84B',
+          pointRadius:4,
+          tension:0.3,
+          fill:true
+        },
+        {
+          label: t.th_cost,
+          data: costs,
+          borderColor:'#a89870',
+          backgroundColor:'transparent',
+          borderWidth:1.5,
+          borderDash:[5,5],
+          pointRadius:3,
+          tension:0.3,
+          fill:false
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:true,
+      plugins:{
+        legend:{labels:{color:'#a89870',font:{family:'Tajawal',size:12}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString(lang==='ar'?'ar-SA':'en-US')+' '+t.sar}}
+      },
+      scales:{
+        x:{ticks:{color:'#6b5e3e',font:{size:10}},grid:{color:'rgba(201,150,42,0.08)'}},
+        y:{ticks:{color:'#6b5e3e',font:{size:10},callback:v=>v.toLocaleString()},grid:{color:'rgba(201,150,42,0.08)'}}
+      }
+    }
+  });
 }
 
 setLang(lang);
