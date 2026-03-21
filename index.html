@@ -118,8 +118,30 @@
   .st tr:last-child td{border-bottom:none;}
   .trow{display:flex;justify-content:space-between;align-items:center;padding:12px 17px;background:rgba(201,150,42,.08);border-top:1px solid var(--border2);font-size:14px;font-weight:700;}
   .trow span{color:var(--gold-light);}
-  @media(max-width:900px){.sidebar{width:54px;}.logo h1,.logo p,.ni span,.sbb span{display:none;}.logo{padding:13px 10px;}.nav{padding:8px 6px;}.ni{justify-content:center;padding:9px;}.main{margin-right:54px;padding:16px 12px;}.mets{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}.fg2{grid-template-columns:1fr;}}
-  @media(max-width:500px){.mets{grid-template-columns:1fr;}.main{padding:11px 9px;}}
+  @media(max-width:900px){
+    .sidebar{display:none;}
+    .main{margin-right:0;padding:16px 12px;padding-bottom:80px;}
+    .mets{grid-template-columns:1fr 1fr;}
+    .g2{grid-template-columns:1fr;}
+    .fg2{grid-template-columns:1fr;}
+    .bottom-nav{display:flex;}
+  }
+  @media(max-width:500px){.mets{grid-template-columns:1fr;}.main{padding:11px 9px;padding-bottom:80px;}}
+  .bottom-nav{
+    display:none;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--bg2);border-top:1px solid var(--border);
+    z-index:200;height:62px;
+    align-items:stretch;
+  }
+  .bn-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;cursor:pointer;color:var(--text3);font-size:10px;
+    border:none;background:none;font-family:'Tajawal',sans-serif;
+    transition:color .2s;padding:6px 0;
+  }
+  .bn-item.active{color:var(--gold-light);}
+  .bn-item svg{width:22px;height:22px;}
 </style>
 </head>
 <body>
@@ -172,6 +194,30 @@
     </div>
   </div>
 </aside>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bn-item active" onclick="showPage('dashboard')" id="bn-dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span data-i="nav_dash">الرئيسية</span>
+  </button>
+  <button class="bn-item" onclick="showPage('add')" id="bn-add">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span data-i="nav_add">إضافة</span>
+  </button>
+  <button class="bn-item" onclick="showPage('history')" id="bn-history">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    <span data-i="nav_hist">السجل</span>
+  </button>
+  <button class="bn-item" onclick="showPage('summary')" id="bn-summary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 12 L18 12"/></svg>
+    <span data-i="nav_sum">العيارات</span>
+  </button>
+  <button class="bn-item" onclick="showPage('analytics')" id="bn-analytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+    <span data-i="nav_analytics">تحليلات</span>
+  </button>
+</nav>
 
 <main class="main">
 
@@ -396,8 +442,14 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.ni')[['dashboard','add','history','summary','analytics'].indexOf(id)].classList.add('active');
+  const idx=['dashboard','add','history','summary','analytics'].indexOf(id);
+  if(idx>=0) document.querySelectorAll('.ni')[idx].classList.add('active');
+  // update bottom nav
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
+  const bn=document.getElementById('bn-'+id);
+  if(bn) bn.classList.add('active');
   refreshAll();
+  window.scrollTo(0,0);
 }
 
 function refreshAll(){
