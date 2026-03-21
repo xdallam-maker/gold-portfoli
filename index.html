@@ -363,7 +363,7 @@
     </div>
 
     <!-- ZAKAT DETAIL -->
-    <div class="g2">
+    <div class="g2" style="margin-bottom:16px;">
       <div class="card">
         <div class="chd" data-i="zakat_detail">تفاصيل الزكاة</div>
         <div class="cbd" id="zakat-detail"></div>
@@ -371,6 +371,47 @@
       <div class="card">
         <div class="chd" data-i="avg_by_karat">متوسط السعر حسب العيار</div>
         <div class="cbd" id="avg-by-karat"></div>
+      </div>
+    </div>
+
+    <!-- INVESTMENT PLANNER -->
+    <div class="card">
+      <div class="chd">خطة الاستثمار الشهري</div>
+      <div class="cbd">
+        <div class="fg2" style="margin-bottom:16px;">
+          <div class="fg">
+            <label>الكمية الشهرية (جرام)</label>
+            <input type="number" id="plan-grams" value="5" min="0.1" step="0.1" oninput="calcPlan()"/>
+          </div>
+          <div class="fg">
+            <label>العيار</label>
+            <select id="plan-karat" onchange="calcPlan()">
+              <option value="1">24K</option>
+              <option value="0.9167">22K</option>
+              <option value="0.875">21K</option>
+              <option value="0.75" selected>18K</option>
+              <option value="0.625">15K</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>نسبة نمو سنوية متوقعة (%)</label>
+            <input type="number" id="plan-growth" value="8" min="0" max="50" step="0.5" oninput="calcPlan()"/>
+          </div>
+          <div class="fg">
+            <label>عدد السنوات</label>
+            <input type="number" id="plan-years" value="5" min="1" max="30" step="1" oninput="calcPlan()"/>
+          </div>
+        </div>
+
+        <!-- PLAN RESULTS -->
+        <div id="plan-results" style="margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div class="mc"><div class="ml">إجمالي الوزن</div><div class="mv n" id="plan-w">—</div><div class="mch" style="color:var(--text3);">جرام</div></div>
+          <div class="mc hl"><div class="ml">القيمة المتوقعة</div><div class="mv" id="plan-val">—</div><div class="mch" style="color:var(--text3);">ر.س</div></div>
+          <div class="mc"><div class="ml">إجمالي التكلفة</div><div class="mv n" id="plan-cost">—</div><div class="mch" style="color:var(--text3);">ر.س</div></div>
+        </div>
+
+        <!-- PLAN CHART -->
+        <canvas id="plan-chart" style="width:100%;max-height:220px;"></canvas>
       </div>
     </div>
   </div>
@@ -814,11 +855,61 @@ function mobNav(id){
   if(el) el.textContent=titles[id]||'';
 }
 
+let planChart = null;
+
+function calcPlan(){
+  const grams = parseFloat(document.getElementById('plan-grams').value)||5;
+  const karat = parseFloat(document.getElementById('plan-karat').value)||0.75;
+  const growth = parseFloat(document.getElementById('plan-growth').value)||8;
+  const years = parseInt(document.getElementById('plan-years').value)||5;
+  const p = ppg();
+  const monthlyGrams24 = grams * karat;
+  const monthlyGrowthRate = Math.pow(1 + growth/100, 1/12) - 1;
+  let totalW24=0, totalCost=0;
+  const labels=[], values=[], costs=[];
+  let curPrice = p;
+  const months = years * 12;
+  for(let m=1; m<=months; m++){
+    totalW24 += monthlyGrams24;
+    totalCost += monthlyGrams24 * curPrice;
+    curPrice *= (1 + monthlyGrowthRate);
+    if(m % 12 === 0 || m === months){
+      const yr = Math.ceil(m/12);
+      labels.push((lang==='ar'?'سنة ':'Year ') + yr);
+      values.push(parseFloat((totalW24 * curPrice).toFixed(0)));
+      costs.push(parseFloat(totalCost.toFixed(0)));
+    }
+  }
+  const finalVal = values[values.length-1]||0;
+  document.getElementById('plan-w').textContent = totalW24.toFixed(1);
+  document.getElementById('plan-val').textContent = fmt(finalVal,0);
+  document.getElementById('plan-cost').textContent = fmt(totalCost,0);
+  const canvas = document.getElementById('plan-chart');
+  if(!canvas) return;
+  if(planChart) planChart.destroy();
+  planChart = new Chart(canvas, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:lang==='ar'?'القيمة المتوقعة':'Expected Value',data:values,backgroundColor:'rgba(232,184,75,0.7)',borderColor:'#E8B84B',borderWidth:1,borderRadius:4},
+        {label:lang==='ar'?'إجمالي التكلفة':'Total Cost',data:costs,backgroundColor:'rgba(168,152,112,0.3)',borderColor:'#a89870',borderWidth:1,type:'line',fill:false,tension:0.3,pointRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{labels:{color:'#a89870',font:{family:'Tajawal',size:11}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString(lang==='ar'?'ar-SA':'en-US')+' '+(lang==='ar'?'ر.س':'SAR')}}},
+      scales:{x:{ticks:{color:'#6b5e3e',font:{size:10}},grid:{color:'rgba(201,150,42,0.08)'}},y:{ticks:{color:'#6b5e3e',font:{size:10},callback:v=>v.toLocaleString()},grid:{color:'rgba(201,150,42,0.08)'}}}
+    }
+  });
+}
+
 setLang(lang);
 document.getElementById('app').style.display='block';
 autoFetchPrice();
 renderDashboard();
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+setTimeout(calcPlan, 500);
 </script>
 </body>
 </html>
