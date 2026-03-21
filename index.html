@@ -118,35 +118,33 @@
   .st tr:last-child td{border-bottom:none;}
   .trow{display:flex;justify-content:space-between;align-items:center;padding:12px 17px;background:rgba(201,150,42,.08);border-top:1px solid var(--border2);font-size:14px;font-weight:700;}
   .trow span{color:var(--gold-light);}
+  .mob-bar{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;align-items:center;justify-content:space-between;padding:0 16px;}
+  .mob-title{font-size:15px;font-weight:700;color:var(--text);}
+  .mob-ham{background:none;border:none;cursor:pointer;color:var(--text);padding:8px;display:flex;flex-direction:column;gap:5px;}
+  .mob-ham span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .2s;}
+  .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;}
+  .mob-overlay.open{display:block;}
+  .mob-drawer{position:fixed;top:0;right:-260px;width:240px;height:100vh;background:var(--bg2);z-index:500;transition:right .25s ease;display:flex;flex-direction:column;border-left:1px solid var(--border);}
+  .mob-drawer.open{right:0;}
+  .mob-drawer-head{padding:20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .mob-drawer-title{font-size:16px;font-weight:700;}
+  .mob-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;}
+  .mob-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px;}
+  .mob-ni{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--rs);cursor:pointer;font-size:14px;color:var(--text2);border:1px solid transparent;transition:all .2s;background:none;width:100%;font-family:'Tajawal',sans-serif;text-align:right;}
+  .mob-ni:hover,.mob-ni.active{background:rgba(201,150,42,.12);border-color:var(--border2);color:var(--gold-light);}
+  .mob-ni svg{width:18px;height:18px;flex-shrink:0;}
+  .mob-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:6px;}
+  .mob-lb{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Tajawal',sans-serif;text-align:center;}
+  .mob-lb.active{border-color:var(--border2);color:var(--gold-light);}
   @media(max-width:900px){
     .sidebar{display:none;}
-    .main{margin-right:0;padding:16px 12px;padding-bottom:80px;}
+    .mob-bar{display:flex;}
+    .main{margin-right:0;padding:70px 14px 20px;}
     .mets{grid-template-columns:1fr 1fr;}
     .g2{grid-template-columns:1fr;}
     .fg2{grid-template-columns:1fr;}
-    .bottom-nav{display:flex;}
   }
-  @media(max-width:500px){.mets{grid-template-columns:1fr;}.main{padding:11px 9px;padding-bottom:80px;}}
-  .bottom-nav{
-    display:none;
-    position:fixed;bottom:0;left:0;right:0;
-    background:var(--bg2);border-top:1px solid var(--border);
-    z-index:200;height:62px;
-    align-items:stretch;
-  }
-  .bn-item{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:4px;cursor:pointer;color:var(--text3);font-size:10px;
-    border:none;background:none;font-family:'Tajawal',sans-serif;
-    transition:color .2s;padding:6px 0;
-    -webkit-tap-highlight-color:transparent;
-    touch-action:manipulation;
-    user-select:none;
-    -webkit-user-select:none;
-  }
-  .bn-item.active{color:var(--gold-light);}
-  .bn-item svg{width:22px;height:22px;pointer-events:none;}
-  .bn-item span{pointer-events:none;}
+  @media(max-width:500px){.mets{grid-template-columns:1fr;}.main{padding:68px 11px 16px;}}
 </style>
 </head>
 <body>
@@ -177,6 +175,45 @@
 </div>
 
 <div id="app">
+
+<!-- MOBILE TOP BAR -->
+<div class="mob-bar" id="mob-bar">
+  <div class="mob-title" id="mob-page-title">لوحة التحكم</div>
+  <button class="mob-ham" onclick="toggleDrawer()" id="mob-ham-btn">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <div class="mob-ni active" id="mob-ni-dashboard" onclick="mobNav('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span data-i="nav_dash">لوحة التحكم</span>
+  </div>
+  <div class="mob-ni" id="mob-ni-add" onclick="mobNav('add')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span data-i="nav_add">تسجيل شراء</span>
+  </div>
+  <div class="mob-ni" id="mob-ni-history" onclick="mobNav('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    <span data-i="nav_hist">سجل المشتريات</span>
+  </div>
+  <div class="mob-ni" id="mob-ni-summary" onclick="mobNav('summary')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 12 L18 12"/></svg>
+    <span data-i="nav_sum">ملخص العيارات</span>
+  </div>
+  <div class="mob-ni" id="mob-ni-analytics" onclick="mobNav('analytics')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+    <span data-i="nav_analytics">التحليلات</span>
+  </div>
+  <div class="mob-footer">
+    <button class="mob-lb active" id="mob-ar" onclick="setLang('ar');closeDrawer()">العربية</button>
+    <button class="mob-lb" id="mob-en" onclick="setLang('en');closeDrawer()">English</button>
+    <button class="mob-lb" onclick="lockApp();closeDrawer()">🔒</button>
+  </div>
+</div>
+
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">🪙</div>
@@ -200,29 +237,51 @@
   </div>
 </aside>
 
-<!-- BOTTOM NAV (mobile) -->
-<nav class="bottom-nav" id="bottom-nav">
-  <button class="bn-item active" onclick="showPage('dashboard')" id="bn-dashboard">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span data-i="nav_dash">الرئيسية</span>
+<!-- MOBILE TOP BAR -->
+<div class="mob-bar" id="mob-bar">
+  <div class="mob-title" id="mob-page-title">لوحة التحكم</div>
+  <button class="mob-ham" onclick="openDrawer()">
+    <span></span><span></span><span></span>
   </button>
-  <button class="bn-item" onclick="showPage('add')" id="bn-add">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    <span data-i="nav_add">إضافة</span>
-  </button>
-  <button class="bn-item" onclick="showPage('history')" id="bn-history">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-    <span data-i="nav_hist">السجل</span>
-  </button>
-  <button class="bn-item" onclick="showPage('summary')" id="bn-summary">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 12 L18 12"/></svg>
-    <span data-i="nav_sum">العيارات</span>
-  </button>
-  <button class="bn-item" onclick="showPage('analytics')" id="bn-analytics">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
-    <span data-i="nav_analytics">تحليلات</span>
-  </button>
-</nav>
+</div>
+
+<!-- OVERLAY -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="mob-drawer" id="mob-drawer">
+  <div class="mob-drawer-head">
+    <div class="mob-drawer-title">🪙 محفظة الذهب</div>
+    <button class="mob-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="mob-nav">
+    <button class="mob-ni active" id="mni-dashboard" onclick="mobNav('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span data-i="nav_dash">لوحة التحكم</span>
+    </button>
+    <button class="mob-ni" id="mni-add" onclick="mobNav('add')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span data-i="nav_add">تسجيل شراء</span>
+    </button>
+    <button class="mob-ni" id="mni-history" onclick="mobNav('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      <span data-i="nav_hist">سجل المشتريات</span>
+    </button>
+    <button class="mob-ni" id="mni-summary" onclick="mobNav('summary')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 12 L18 12"/></svg>
+      <span data-i="nav_sum">ملخص العيارات</span>
+    </button>
+    <button class="mob-ni" id="mni-analytics" onclick="mobNav('analytics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      <span data-i="nav_analytics">التحليلات</span>
+    </button>
+  </div>
+  <div class="mob-footer">
+    <button class="mob-lb active" id="mlb-ar" onclick="setLang('ar');updateMobLang()">ع</button>
+    <button class="mob-lb" id="mlb-en" onclick="setLang('en');updateMobLang()">EN</button>
+    <button class="mob-lb" onclick="lockApp();closeDrawer()">🔒</button>
+  </div>
+</div>
 
 <main class="main">
 
@@ -359,6 +418,12 @@ function setLang(l){
   document.getElementById('l-title').textContent=t.l_title;
   document.getElementById('s-title').textContent=t.l_title;
   applyI18n();updateLoginText();refreshAll();
+  // sync mobile lang buttons
+  ['mob-ar','mob-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',(id==='mob-ar'&&ar)||(id==='mob-en'&&!ar));});
+  // update mobile page title
+  const titles={dashboard:t.nav_dash,add:t.nav_add,history:t.nav_hist,summary:t.nav_sum,analytics:t.nav_analytics};
+  const cur=document.querySelector('.page.active');
+  if(cur){const pid=cur.id.replace('page-','');const el=document.getElementById('mob-page-title');if(el)el.textContent=titles[pid]||'';}
 }
 
 function applyI18n(){
@@ -444,22 +509,13 @@ function startCountdown(){
 }
 
 function showPage(id){
-  // hide all pages
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  // show target page
-  const pg = document.getElementById('page-'+id);
-  if(pg) pg.classList.add('active');
-  // sidebar nav
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
   const idx=['dashboard','add','history','summary','analytics'].indexOf(id);
-  const nis = document.querySelectorAll('.ni');
-  if(idx>=0 && nis[idx]) nis[idx].classList.add('active');
-  // bottom nav
-  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
-  const bn=document.getElementById('bn-'+id);
-  if(bn) bn.classList.add('active');
+  const nis=document.querySelectorAll('.ni');
+  if(idx>=0&&nis[idx])nis[idx].classList.add('active');
   refreshAll();
-  window.scrollTo(0,0);
 }
 
 function refreshAll(){
@@ -480,16 +536,67 @@ async function fetchHistoricalPrice(){
   const today=new Date().toISOString().split('T')[0];
   if(date>=today){paidEl.placeholder=t.paid_ph;if(badge)badge.textContent='';updatePreview();return;}
   if(badge)badge.textContent=t.hist_fetching;
-  let done=false;
-  if(!done){try{const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@'+date+'/v1/currencies/xau.json');const d=await r.json();const s=d?.xau?.sar;if(s>500&&s<200000){const sg=parseFloat((s/31.1035).toFixed(2));const wt=parseFloat(document.getElementById('f-weight').value),kt=parseFloat(document.getElementById('f-karat').value);if(wt>0&&kt>0)paidEl.value=parseFloat((wt*kt*sg).toFixed(2));else paidEl.placeholder=sg+' '+t.sar;if(badge)badge.textContent=t.hist_ok+' '+date;done=true;updatePreview();}}catch(_){}}
-  if(!done){try{const r=await fetch('https://api.metals.live/v1/spot/gold/'+date);const d=await r.json();const u=Array.isArray(d)?d[0]?.gold:d?.price;if(u>50){const sg=parseFloat(((u/31.1035)*3.75).toFixed(2));const wt=parseFloat(document.getElementById('f-weight').value),kt=parseFloat(document.getElementById('f-karat').value);if(wt>0&&kt>0)paidEl.value=parseFloat((wt*kt*sg).toFixed(2));else paidEl.placeholder=sg+' '+t.sar;if(badge)badge.textContent=t.hist_ok+' '+date;done=true;updatePreview();}}catch(_){}}
-  if(!done){
-    // fallback: بيانات تاريخية محلية حسب السنة
-    const yr=parseInt(date.split('-')[0]);
-    const sg=GOLD_HISTORY[yr]||GOLD_HISTORY[Math.max(2000,Math.min(yr,2025))];
-    if(sg){const wt=parseFloat(document.getElementById('f-weight').value),kt=parseFloat(document.getElementById('f-karat').value);if(wt>0&&kt>0)paidEl.value=parseFloat((wt*kt*sg).toFixed(2));else paidEl.placeholder=sg+' '+t.sar;if(badge)badge.textContent='📊 '+date;done=true;updatePreview();}
+
+  function applyPrice(sarGram,src){
+    const wt=parseFloat(document.getElementById('f-weight').value);
+    const kt=parseFloat(document.getElementById('f-karat').value);
+    if(wt>0&&kt>0) paidEl.value=parseFloat((wt*kt*sarGram).toFixed(2));
+    else paidEl.placeholder=sarGram+' '+t.sar;
+    if(badge) badge.textContent='✓ '+sarGram+' '+t.sar+'/جرام ('+date+')';
+    paidEl.style.borderColor='';
+    updatePreview();
   }
-  if(!done){if(badge)badge.textContent=t.hist_fail;paidEl.placeholder=t.paid_ph;}
+
+  function fail(){
+    if(badge) badge.textContent='⚠️ ما أمكن جلب السعر — أدخله يدوياً';
+    paidEl.value='';
+    paidEl.placeholder='أدخل سعر الجرام يدوياً (ر.س)';
+    paidEl.style.borderColor='var(--red)';
+    paidEl.focus();
+    setTimeout(()=>paidEl.style.borderColor='',3000);
+    updatePreview();
+  }
+
+  // نجرب أقرب 3 أيام (عطل نهاية الأسبوع ما عندها بيانات)
+  const datesToTry=[];
+  for(let i=0;i<=3;i++){
+    const d2=new Date(date);d2.setDate(d2.getDate()-i);
+    datesToTry.push(d2.toISOString().split('T')[0]);
+  }
+
+  // مصدر 1: fawazahmed0 — يغطي من 2000 حتى اليوم
+  for(const d of datesToTry){
+    try{
+      const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@'+d+'/v1/currencies/xau.json');
+      const js=await r.json();
+      const s=js?.xau?.sar;
+      if(s>3000&&s<30000){applyPrice(parseFloat((s/31.1035).toFixed(2)));return;}
+    }catch(_){}
+  }
+
+  // مصدر 2: frankfurter.app — XAU مقابل USD ثم تحويل لـ SAR
+  for(const d of datesToTry){
+    try{
+      const r=await fetch('https://api.frankfurter.app/'+d+'?from=XAU&to=USD');
+      const js=await r.json();
+      const usdOz=js?.rates?.USD;
+      if(usdOz>500&&usdOz<10000){
+        applyPrice(parseFloat(((usdOz/31.1035)*3.75).toFixed(2)));return;
+      }
+    }catch(_){}
+  }
+
+  // مصدر 3: metals.live تاريخي
+  for(const d of datesToTry){
+    try{
+      const r=await fetch('https://api.metals.live/v1/spot/gold/'+d);
+      const js=await r.json();
+      const u=Array.isArray(js)?js[0]?.gold:js?.price;
+      if(u>500&&u<10000){applyPrice(parseFloat(((u/31.1035)*3.75).toFixed(2)));return;}
+    }catch(_){}
+  }
+
+  fail();
 }
 
 function updatePreview(){
@@ -512,7 +619,19 @@ function addPurchase(){
   const notes=document.getElementById('f-notes').value.trim();
   if(!wt||wt<=0){const el=document.getElementById('f-weight');el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1200);return;}
   const pur=parseFloat(kt),w24=wt*pur;
-  const paid=paidRaw?parseFloat(paidRaw):parseFloat((w24*ppg()).toFixed(2));
+  const paidParsed=parseFloat(paidRaw);
+  // لو السعر فاضي أو صفر، أوقف التسجيل واطلب الإدخال
+  if(!paidRaw||isNaN(paidParsed)||paidParsed<=0){
+    const pEl=document.getElementById('f-paid');
+    pEl.style.borderColor='var(--red)';
+    pEl.placeholder='أدخل سعر الجرام يدوياً (ر.س)';
+    pEl.focus();
+    setTimeout(()=>pEl.style.borderColor='',3000);
+    const badge=document.getElementById('hist-price-badge');
+    if(badge) badge.textContent='⚠️ السعر مطلوب للمتابعة';
+    return;
+  }
+  const paid=paidParsed;
   purchases.unshift({id:Date.now(),name,weight:wt,karat:kt,weight24:w24,paid,date,notes});
   save();
   ['f-name','f-weight','f-paid','f-notes'].forEach(id=>document.getElementById(id).value='');
@@ -706,16 +825,54 @@ function renderAnalytics(){
   });
 }
 
-// ── بيانات أسعار الذهب التاريخية (متوسط سنوي، ر.س/جرام 24K)
-const GOLD_HISTORY = {
-  2000:33.6, 2001:32.7, 2002:37.4, 2003:43.8, 2004:49.3,
-  2005:53.5, 2006:72.8, 2007:83.8, 2008:105.1, 2009:117.3,
-  2010:147.7, 2011:189.6, 2012:201.2, 2013:170.1, 2014:152.6,
-  2015:139.9, 2016:150.8, 2017:151.6, 2018:152.9, 2019:168.0,
-  2020:213.4, 2021:216.9, 2022:217.2, 2023:233.9, 2024:287.8,
-  2025:349.8
-};
+function openDrawer(){
+  document.getElementById('mob-drawer').classList.add('open');
+  document.getElementById('mob-overlay').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-overlay').classList.remove('open');
+}
+function mobNav(id){
+  showPage(id);
+  closeDrawer();
+  // update mob nav active
+  document.querySelectorAll('.mob-ni').forEach(b=>b.classList.remove('active'));
+  const mn=document.getElementById('mni-'+id);
+  if(mn) mn.classList.add('active');
+  // update top bar title
+  const titles={dashboard:t.nav_dash,add:t.nav_add,history:t.nav_hist,summary:t.nav_sum,analytics:t.nav_analytics};
+  const el=document.getElementById('mob-page-title');
+  if(el) el.textContent=titles[id]||'';
+}
+function updateMobLang(){
+  const ar=lang==='ar';
+  ['mlb-ar','mlb-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',(id==='mlb-ar'&&ar)||(id==='mlb-en'&&!ar));});
+  // update drawer dir
+  const drawer=document.getElementById('mob-drawer');
+  if(drawer){drawer.style.right=ar?null:undefined;}
+}
 
+function toggleDrawer(){
+  document.getElementById('mob-drawer').classList.toggle('open');
+  document.getElementById('mob-overlay').classList.toggle('open');
+}
+function closeDrawer(){
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-overlay').classList.remove('open');
+}
+function mobNav(id){
+  showPage(id);
+  closeDrawer();
+  // update mobile active
+  document.querySelectorAll('.mob-ni').forEach(n=>n.classList.remove('active'));
+  const mn=document.getElementById('mob-ni-'+id);
+  if(mn) mn.classList.add('active');
+  // update title
+  const titles={dashboard:t.nav_dash,add:t.nav_add,history:t.nav_hist,summary:t.nav_sum,analytics:t.nav_analytics};
+  const el=document.getElementById('mob-page-title');
+  if(el) el.textContent=titles[id]||'';
+}
 
 setLang(lang);
 updateLoginText();
